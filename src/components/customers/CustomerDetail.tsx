@@ -45,8 +45,12 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Date of Birth</p>
-            <p>{customer.date_of_birth ? format(new Date(customer.date_of_birth), 'PPP') : '-'}</p>
+            <p className="text-sm text-muted-foreground">Age</p>
+            <p>
+              {customer.date_of_birth
+                ? Math.max(0, new Date().getFullYear() - new Date(customer.date_of_birth).getFullYear())
+                : '-'}
+            </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Loyalty Points</p>

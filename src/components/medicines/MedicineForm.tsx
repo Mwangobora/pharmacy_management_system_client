@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCategories } from '@/hooks/queries/useCategories'
+import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useCreateMedicine, useUpdateMedicine } from '@/hooks/mutations/useMedicines'
 import type { Medicine, MedicineUnit } from '@/types/inventory'
 
@@ -36,7 +37,16 @@ const schema = z.object({
   barcode: z.string().optional(),
   requires_prescription: z.boolean().default(false),
   is_active: z.boolean().default(true),
-})
+}).refine(
+  (data) => {
+    if (!data.expiry_date) return true
+    const today = new Date()
+    const expiry = new Date(`${data.expiry_date}T00:00:00`)
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    return expiry >= todayMidnight
+  },
+  { message: 'Expiry date must be today or later', path: ['expiry_date'] }
+)
 
 type FormData = z.input<typeof schema>
 
@@ -49,6 +59,8 @@ interface MedicineFormProps {
 export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps) {
   const { data: categories = [] } = useCategories()
   const safeCategories = Array.isArray(categories) ? categories : []
+  const { data: suppliers = [] } = useSuppliers()
+  const safeSuppliers = Array.isArray(suppliers) ? suppliers : []
   const createMedicine = useCreateMedicine()
   const updateMedicine = useUpdateMedicine()
   const isEditing = !!medicine
@@ -116,12 +128,23 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
               <SelectContent>{safeCategories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="space-y-2"><Label>Supplier ID</Label><Input {...register('supplier')} /></div>
+          <div className="space-y-2">
+            <Label>Supplier</Label>
+            <Select value={watch('supplier')} onValueChange={(v) => setValue('supplier', v)}>
+              <SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger>
+              <SelectContent>
+                {safeSuppliers.map((supplier) => (
+                  <SelectItem key={supplier.id} value={supplier.id}>{supplier.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.supplier && <p className="text-sm text-destructive">{errors.supplier.message}</p>}
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2"><Label>Batch Number</Label><Input {...register('batch_number')} /></div>
           <div className="space-y-2"><Label>Manufacture Date</Label><Input type="date" {...register('manufacture_date')} /></div>
-          <div className="space-y-2"><Label>Expiry Date</Label><Input type="date" {...register('expiry_date')} /></div>
+          <div className="space-y-2"><Label>Expiry Date</Label><Input type="date" min={new Date().toISOString().split('T')[0]} {...register('expiry_date')} />{errors.expiry_date && <p className="text-sm text-destructive">{errors.expiry_date.message}</p>}</div>
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2"><Label>Purchase Price</Label><Input {...register('purchase_price')} /></div>

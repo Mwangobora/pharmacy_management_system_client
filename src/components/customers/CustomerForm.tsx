@@ -22,6 +22,7 @@ const schema = z.object({
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   address: z.string().optional(),
   date_of_birth: z.string().optional(),
+  age: z.coerce.number().optional(),
   gender: z.enum(['M', 'F', 'Other']),
 })
 
@@ -54,12 +55,16 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
       email: '',
       address: '',
       date_of_birth: '',
+      age: undefined,
       gender: 'M',
     },
   })
 
   useEffect(() => {
     if (customer) {
+      const ageValue = customer.date_of_birth
+        ? Math.max(0, new Date().getFullYear() - new Date(customer.date_of_birth).getFullYear())
+        : undefined
       reset({
         first_name: customer.first_name,
         last_name: customer.last_name,
@@ -67,6 +72,7 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
         email: customer.email || '',
         address: customer.address || '',
         date_of_birth: customer.date_of_birth || '',
+        age: ageValue,
         gender: customer.gender,
       })
     } else {
@@ -77,18 +83,26 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
         email: '',
         address: '',
         date_of_birth: '',
+        age: undefined,
         gender: 'M',
       })
     }
   }, [customer, reset])
 
   const onSubmit = async (data: FormData) => {
+    const payload = { ...data }
+    if (payload.age !== undefined) {
+      const today = new Date()
+      const year = Math.max(0, today.getFullYear() - payload.age)
+      payload.date_of_birth = `${year}-01-01`
+    }
+    delete payload.age
     try {
       if (isEditing) {
-        await updateCustomer.mutateAsync({ id: customer.id, payload: data })
+        await updateCustomer.mutateAsync({ id: customer.id, payload })
         toast.success('Customer updated successfully')
       } else {
-        await createCustomer.mutateAsync(data)
+        await createCustomer.mutateAsync(payload)
         toast.success('Customer created successfully')
       }
       onOpenChange(false)
@@ -133,8 +147,8 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="date_of_birth">Date of Birth</Label>
-            <Input id="date_of_birth" type="date" {...register('date_of_birth')} />
+            <Label htmlFor="age">Age</Label>
+            <Input id="age" type="number" min={0} {...register('age')} />
           </div>
           <div className="space-y-2">
             <Label>Gender</Label>

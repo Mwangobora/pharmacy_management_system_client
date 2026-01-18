@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCustomers } from '@/hooks/queries/useCustomers'
+import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreateSale, useUpdateSale } from '@/hooks/mutations/useSales'
 import type { PaymentMethod, Sale } from '@/types/sales'
 
@@ -54,9 +55,12 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
 export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
   const { data: customers = [] } = useCustomers()
   const safeCustomers = Array.isArray(customers) ? customers : []
+  const { data: medicines = [] } = useMedicines()
+  const safeMedicines = Array.isArray(medicines) ? medicines : []
   const createSale = useCreateSale()
   const updateSale = useUpdateSale()
   const isEditing = !!sale
+  const [medicineSearch, setMedicineSearch] = useState('')
 
   const {
     register,
@@ -181,7 +185,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="sale_date">Sale Date</Label>
-            <Input id="sale_date" type="datetime-local" {...register('sale_date')} />
+            <Input id="sale_date" type="date" {...register('sale_date')} />
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -249,20 +253,67 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                   {fields.map((field, index) => (
                     <div key={field.id} className="grid grid-cols-6 gap-3">
                       <div className="col-span-2 space-y-1">
-                        <Label>Medicine ID</Label>
-                        <Input {...register(`items.${index}.medicine`)} placeholder="Medicine ID" />
-                      </div>
+                        <Label>Medicine</Label>
+                        <Select
+                          value={watch(`items.${index}.medicine`) || ''}
+                          onValueChange={(value) => {
+                            setValue(`items.${index}.medicine`, value)
+                            const selected = safeMedicines.find((med) => med.id === value)
+                            if (selected) {
+                            setValue(`items.${index}.unit_price`, String(selected.selling_price))
+                            setValue(`items.${index}.batch_number`, selected.batch_number)
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select medicine" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <div className="p-2">
+                            <Input
+                              placeholder="Search medicines..."
+                              value={medicineSearch}
+                              onChange={(event) => setMedicineSearch(event.target.value)}
+                            />
+                          </div>
+                          {safeMedicines
+                            .filter((medicine) =>
+                              `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
+                                .toLowerCase()
+                                .includes(medicineSearch.toLowerCase())
+                            )
+                            .map((medicine) => (
+                              <SelectItem key={medicine.id} value={medicine.id}>
+                                <div className="flex w-full items-center justify-between gap-2">
+                                  <span>
+                                    {medicine.name} ({medicine.batch_number})
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Stock: {medicine.stock_quantity}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                       <div className="space-y-1">
                         <Label>Qty</Label>
                         <Input type="number" {...register(`items.${index}.quantity`)} />
                       </div>
                       <div className="space-y-1">
                         <Label>Unit Price</Label>
-                        <Input {...register(`items.${index}.unit_price`)} />
+                        <Input
+                          {...register(`items.${index}.unit_price`)}
+                          disabled={!!watch(`items.${index}.medicine`)}
+                        />
                       </div>
                       <div className="space-y-1">
                         <Label>Batch</Label>
-                        <Input {...register(`items.${index}.batch_number`)} />
+                        <Input
+                          {...register(`items.${index}.batch_number`)}
+                          disabled={!!watch(`items.${index}.medicine`)}
+                        />
                       </div>
                       <div className="flex items-end justify-end">
                         <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
