@@ -115,6 +115,16 @@ export interface AddLoyaltyPointsPayload {
   points: number
 }
 
+export interface CustomerLoyaltySummary {
+  customer_id: string
+  customer_name: string
+  loyalty_points: number
+  total_purchases: number
+  total_spent: string
+  average_purchase: string
+  last_purchase_date: string | null
+}
+
 export interface DailySummary {
   date: string
   total_sales: number
