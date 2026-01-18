@@ -29,6 +29,7 @@ export default function MedicinesPage() {
 
   const { data: medicines = [], isLoading, isError, refetch } = useMedicines({ search, category, stock_status: stockStatus })
   const { data: categories = [] } = useCategories()
+  const safeCategories = Array.isArray(categories) ? categories : []
   const deleteMedicine = useDeleteMedicine()
 
   const handleEdit = (medicine: Medicine) => { setSelectedMedicine(medicine); setFormOpen(true) }
@@ -70,7 +71,7 @@ export default function MedicinesPage() {
           <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem> {/* Updated value */}
-            {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            {safeCategories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={stockStatus} onValueChange={setStockStatus}>

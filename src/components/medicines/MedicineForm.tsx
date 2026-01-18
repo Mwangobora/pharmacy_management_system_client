@@ -38,7 +38,7 @@ const schema = z.object({
   is_active: z.boolean().default(true),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.input<typeof schema>
 
 interface MedicineFormProps {
   open: boolean
@@ -48,21 +48,48 @@ interface MedicineFormProps {
 
 export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps) {
   const { data: categories = [] } = useCategories()
+  const safeCategories = Array.isArray(categories) ? categories : []
   const createMedicine = useCreateMedicine()
   const updateMedicine = useUpdateMedicine()
   const isEditing = !!medicine
+  const defaultValues: FormData = {
+    name: '',
+    generic_name: '',
+    category: '',
+    supplier: '',
+    batch_number: '',
+    manufacture_date: '',
+    expiry_date: '',
+    purchase_price: '',
+    selling_price: '',
+    stock_quantity: 0,
+    min_stock_level: 10,
+    max_stock_level: 100,
+    unit: 'pieces',
+    storage_location: '',
+    barcode: '',
+    requires_prescription: false,
+    is_active: true,
+  }
+
+  const mapMedicineToForm = (value?: Medicine | null): FormData => {
+    if (!value) return defaultValues
+    return {
+      ...defaultValues,
+      ...value,
+      unit: value.unit as string,
+      storage_location: value.storage_location ?? '',
+      barcode: value.barcode ?? '',
+    }
+  }
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { stock_quantity: 0, min_stock_level: 10, max_stock_level: 100, requires_prescription: false, is_active: true },
+    defaultValues,
   })
 
   useEffect(() => {
-    if (medicine) {
-      reset({ ...medicine, unit: medicine.unit as string })
-    } else {
-      reset({ name: '', generic_name: '', category: '', supplier: '', batch_number: '', manufacture_date: '', expiry_date: '', purchase_price: '', selling_price: '', stock_quantity: 0, min_stock_level: 10, max_stock_level: 100, unit: 'pieces', requires_prescription: false, is_active: true })
-    }
+    reset(mapMedicineToForm(medicine))
   }, [medicine, reset])
 
   const onSubmit = async (data: FormData) => {
@@ -86,7 +113,7 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
           <div className="space-y-2"><Label>Category</Label>
             <Select value={watch('category')} onValueChange={(v) => setValue('category', v)}>
               <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-              <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+              <SelectContent>{safeCategories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2"><Label>Supplier ID</Label><Input {...register('supplier')} /></div>

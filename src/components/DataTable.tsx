@@ -34,6 +34,8 @@ export function DataTable<T>({
   emptyDescription,
   keyExtractor,
 }: DataTableProps<T>) {
+  const safeData = Array.isArray(data) ? data : []
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -44,7 +46,7 @@ export function DataTable<T>({
     )
   }
 
-  if (data.length === 0) {
+  if (safeData.length === 0) {
     return <EmptyState title={emptyMessage} description={emptyDescription} />
   }
 
@@ -61,7 +63,7 @@ export function DataTable<T>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item) => (
+          {safeData.map((item) => (
             <TableRow key={keyExtractor(item)}>
               {columns.map((col) => (
                 <TableCell key={col.key} className={col.className}>
