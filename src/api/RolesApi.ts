@@ -1,5 +1,5 @@
 import type { RoleDetail } from '@/types/auth'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface RoleCreatePayload {
@@ -16,7 +16,12 @@ export interface RoleUpdatePayload {
 
 export class RolesApi {
   static async list(signal?: AbortSignal): Promise<RoleDetail[]> {
-    return httpClient.get<RoleDetail[]>(ENDPOINTS.ROLES, undefined, signal)
+    const data = await httpClient.get<RoleDetail[] | { results?: RoleDetail[] }>(
+      ENDPOINTS.ROLES,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: number, signal?: AbortSignal): Promise<RoleDetail> {

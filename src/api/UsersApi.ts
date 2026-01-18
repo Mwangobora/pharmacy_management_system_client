@@ -1,5 +1,5 @@
 import type { User } from '@/types/auth'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface UserCreatePayload {
@@ -22,7 +22,12 @@ export interface UsersListParams {
 
 export class UsersApi {
   static async list(params?: UsersListParams, signal?: AbortSignal): Promise<User[]> {
-    return httpClient.get<User[]>(ENDPOINTS.USERS, params as Record<string, string>, signal)
+    const data = await httpClient.get<User[] | { results?: User[] }>(
+      ENDPOINTS.USERS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<User> {

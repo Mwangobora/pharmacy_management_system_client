@@ -10,7 +10,7 @@ import type {
   PurchaseItem,
 } from '@/types/suppliers'
 import type { Medicine } from '@/types/inventory'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface SupplierListParams {
@@ -30,7 +30,12 @@ export interface PurchaseListParams {
 
 export class SuppliersApi {
   static async list(params?: SupplierListParams, signal?: AbortSignal): Promise<Supplier[]> {
-    return httpClient.get<Supplier[]>(ENDPOINTS.SUPPLIERS, params as Record<string, string>, signal)
+    const data = await httpClient.get<Supplier[] | { results?: Supplier[] }>(
+      ENDPOINTS.SUPPLIERS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Supplier> {
@@ -50,11 +55,21 @@ export class SuppliersApi {
   }
 
   static async getPurchases(id: string, signal?: AbortSignal): Promise<Purchase[]> {
-    return httpClient.get<Purchase[]>(`${ENDPOINTS.SUPPLIERS}${id}/purchases/`, undefined, signal)
+    const data = await httpClient.get<Purchase[] | { results?: Purchase[] }>(
+      `${ENDPOINTS.SUPPLIERS}${id}/purchases/`,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getMedicines(id: string, signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(`${ENDPOINTS.SUPPLIERS}${id}/medicines/`, undefined, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      `${ENDPOINTS.SUPPLIERS}${id}/medicines/`,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getStatistics(id: string, signal?: AbortSignal) {
@@ -64,7 +79,12 @@ export class SuppliersApi {
 
 export class PurchasesApi {
   static async list(params?: PurchaseListParams, signal?: AbortSignal): Promise<Purchase[]> {
-    return httpClient.get<Purchase[]>(ENDPOINTS.PURCHASES, params as Record<string, string>, signal)
+    const data = await httpClient.get<Purchase[] | { results?: Purchase[] }>(
+      ENDPOINTS.PURCHASES,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Purchase> {
@@ -92,7 +112,12 @@ export class PurchasesApi {
   }
 
   static async getPendingPayments(signal?: AbortSignal): Promise<Purchase[]> {
-    return httpClient.get<Purchase[]>(ENDPOINTS.PURCHASES_PENDING_PAYMENTS, undefined, signal)
+    const data = await httpClient.get<Purchase[] | { results?: Purchase[] }>(
+      ENDPOINTS.PURCHASES_PENDING_PAYMENTS,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getDashboardStats(signal?: AbortSignal) {
@@ -102,7 +127,12 @@ export class PurchasesApi {
 
 export class PurchaseItemsApi {
   static async list(params?: { purchase?: string; medicine?: string }, signal?: AbortSignal): Promise<PurchaseItem[]> {
-    return httpClient.get<PurchaseItem[]>(ENDPOINTS.PURCHASE_ITEMS, params as Record<string, string>, signal)
+    const data = await httpClient.get<PurchaseItem[] | { results?: PurchaseItem[] }>(
+      ENDPOINTS.PURCHASE_ITEMS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<PurchaseItem> {

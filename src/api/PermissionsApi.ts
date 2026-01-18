@@ -1,5 +1,5 @@
 import type { PermissionDetail } from '@/types/auth'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface PermissionCreatePayload {
@@ -16,7 +16,12 @@ export interface PermissionUpdatePayload {
 
 export class PermissionsApi {
   static async list(signal?: AbortSignal): Promise<PermissionDetail[]> {
-    return httpClient.get<PermissionDetail[]>(ENDPOINTS.PERMISSIONS, undefined, signal)
+    const data = await httpClient.get<PermissionDetail[] | { results?: PermissionDetail[] }>(
+      ENDPOINTS.PERMISSIONS,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: number, signal?: AbortSignal): Promise<PermissionDetail> {

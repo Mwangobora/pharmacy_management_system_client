@@ -11,7 +11,7 @@ import type {
   DailySummary,
   TopSellingMedicine,
 } from '@/types/sales'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface CustomerListParams {
@@ -40,7 +40,12 @@ export interface PaymentListParams {
 
 export class CustomersApi {
   static async list(params?: CustomerListParams, signal?: AbortSignal): Promise<Customer[]> {
-    return httpClient.get<Customer[]>(ENDPOINTS.CUSTOMERS, params as Record<string, string>, signal)
+    const data = await httpClient.get<Customer[] | { results?: Customer[] }>(
+      ENDPOINTS.CUSTOMERS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Customer> {
@@ -60,7 +65,12 @@ export class CustomersApi {
   }
 
   static async getPurchaseHistory(id: string, signal?: AbortSignal): Promise<Sale[]> {
-    return httpClient.get<Sale[]>(`${ENDPOINTS.CUSTOMERS}${id}/purchase_history/`, undefined, signal)
+    const data = await httpClient.get<Sale[] | { results?: Sale[] }>(
+      `${ENDPOINTS.CUSTOMERS}${id}/purchase_history/`,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getLoyaltySummary(id: string, signal?: AbortSignal) {
@@ -74,7 +84,12 @@ export class CustomersApi {
 
 export class SalesApi {
   static async list(params?: SaleListParams, signal?: AbortSignal): Promise<Sale[]> {
-    return httpClient.get<Sale[]>(ENDPOINTS.SALES, params as Record<string, string>, signal)
+    const data = await httpClient.get<Sale[] | { results?: Sale[] }>(
+      ENDPOINTS.SALES,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Sale> {
@@ -117,7 +132,12 @@ export class SalesApi {
 
 export class PaymentsApi {
   static async list(params?: PaymentListParams, signal?: AbortSignal): Promise<Payment[]> {
-    return httpClient.get<Payment[]>(ENDPOINTS.PAYMENTS, params as Record<string, string>, signal)
+    const data = await httpClient.get<Payment[] | { results?: Payment[] }>(
+      ENDPOINTS.PAYMENTS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Payment> {

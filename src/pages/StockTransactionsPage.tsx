@@ -22,11 +22,10 @@ export default function StockTransactionsPage() {
   const [startDate, setStartDate] = useState<Date>()
   const [endDate, setEndDate] = useState<Date>()
 
-  const params = {
-    transaction_type: transactionType,
-    start_date: startDate ? format(startDate, 'yyyy-MM-dd') : '',
-    end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
-  }
+  const params: Record<string, string> = {}
+  if (transactionType !== 'all') params.transaction_type = transactionType
+  if (startDate) params.start_date = format(startDate, 'yyyy-MM-dd')
+  if (endDate) params.end_date = format(endDate, 'yyyy-MM-dd')
 
   const { data: transactions = [], isLoading, isError, refetch } = useQuery({
     queryKey: transactionKeys.list(params),

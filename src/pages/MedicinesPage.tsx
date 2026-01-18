@@ -27,7 +27,12 @@ export default function MedicinesPage() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const { data: medicines = [], isLoading, isError, refetch } = useMedicines({ search, category, stock_status: stockStatus })
+  const listParams = {
+    search,
+    category: category === 'all' ? undefined : category,
+    stock_status: stockStatus === 'all' ? undefined : stockStatus,
+  }
+  const { data: medicines = [], isLoading, isError, refetch } = useMedicines(listParams)
   const { data: categories = [] } = useCategories()
   const safeCategories = Array.isArray(categories) ? categories : []
   const deleteMedicine = useDeleteMedicine()

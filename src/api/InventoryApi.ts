@@ -9,7 +9,7 @@ import type {
   StockTransaction,
   DashboardStats,
 } from '@/types/inventory'
-import { httpClient } from './HttpClient'
+import { httpClient, unwrapList } from './HttpClient'
 import { ENDPOINTS } from './endpoints'
 
 export interface ListParams {
@@ -37,7 +37,12 @@ export interface StockTransactionParams {
 
 export class CategoriesApi {
   static async list(params?: ListParams, signal?: AbortSignal): Promise<Category[]> {
-    return httpClient.get<Category[]>(ENDPOINTS.CATEGORIES, params as Record<string, string>, signal)
+    const data = await httpClient.get<Category[] | { results?: Category[] }>(
+      ENDPOINTS.CATEGORIES,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Category> {
@@ -57,13 +62,23 @@ export class CategoriesApi {
   }
 
   static async getMedicines(id: string, signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(`${ENDPOINTS.CATEGORIES}${id}/medicines/`, undefined, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      `${ENDPOINTS.CATEGORIES}${id}/medicines/`,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 }
 
 export class MedicinesApi {
   static async list(params?: MedicineListParams, signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(ENDPOINTS.MEDICINES, params as Record<string, string>, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      ENDPOINTS.MEDICINES,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<Medicine> {
@@ -83,15 +98,30 @@ export class MedicinesApi {
   }
 
   static async getLowStock(signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(ENDPOINTS.MEDICINES_LOW_STOCK, undefined, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      ENDPOINTS.MEDICINES_LOW_STOCK,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getExpiringSoon(days = 30, signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(ENDPOINTS.MEDICINES_EXPIRING_SOON, { days: days.toString() }, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      ENDPOINTS.MEDICINES_EXPIRING_SOON,
+      { days: days.toString() },
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getExpired(signal?: AbortSignal): Promise<Medicine[]> {
-    return httpClient.get<Medicine[]>(ENDPOINTS.MEDICINES_EXPIRED, undefined, signal)
+    const data = await httpClient.get<Medicine[] | { results?: Medicine[] }>(
+      ENDPOINTS.MEDICINES_EXPIRED,
+      undefined,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async adjustStock(id: string, payload: StockAdjustment): Promise<Medicine> {
@@ -105,7 +135,12 @@ export class MedicinesApi {
 
 export class StockTransactionsApi {
   static async list(params?: StockTransactionParams, signal?: AbortSignal): Promise<StockTransaction[]> {
-    return httpClient.get<StockTransaction[]>(ENDPOINTS.STOCK_TRANSACTIONS, params as Record<string, string>, signal)
+    const data = await httpClient.get<StockTransaction[] | { results?: StockTransaction[] }>(
+      ENDPOINTS.STOCK_TRANSACTIONS,
+      params as Record<string, string>,
+      signal
+    )
+    return unwrapList(data)
   }
 
   static async getById(id: string, signal?: AbortSignal): Promise<StockTransaction> {

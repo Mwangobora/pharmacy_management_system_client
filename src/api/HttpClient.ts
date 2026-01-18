@@ -7,6 +7,11 @@ export interface ApiError {
   details?: Record<string, string[]>
 }
 
+export function unwrapList<T>(data: T[] | { results?: T[] }): T[] {
+  if (Array.isArray(data)) return data
+  return data.results ?? []
+}
+
 class HttpClient {
   private baseUrl: string
 
