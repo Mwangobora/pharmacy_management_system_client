@@ -16,6 +16,7 @@ export const ROUTES = {
   SALES: '/dashboard/sales',
   SALE_DETAIL: '/dashboard/sales/:id',
   PAYMENTS: '/dashboard/payments',
+  PROFILE: '/dashboard/profile',
   NOT_FOUND: '*',
   ACCESS_DENIED: '/access-denied',
 } as const

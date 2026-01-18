@@ -21,6 +21,7 @@ const CustomersPage = lazy(() => import('@/pages/CustomersPage'))
 const SalesPage = lazy(() => import('@/pages/SalesPage'))
 const SaleDetailPage = lazy(() => import('@/pages/SaleDetailPage'))
 const PaymentsPage = lazy(() => import('@/pages/PaymentsPage'))
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const AccessDeniedPage = lazy(() => import('@/pages/AccessDeniedPage'))
 
@@ -49,6 +50,7 @@ export function AppRoutes() {
             <Route path="sales" element={<SalesPage />} />
             <Route path="sales/:id" element={<SaleDetailPage />} />
             <Route path="payments" element={<PaymentsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
 

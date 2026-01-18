@@ -50,3 +50,13 @@ export interface RefreshTokenPayload {
 export interface RefreshTokenResponse {
   access: string
 }
+
+export interface UpdateProfilePayload {
+  username?: string
+  email?: string
+}
+
+export interface ChangePasswordPayload {
+  current_password: string
+  new_password: string
+}
