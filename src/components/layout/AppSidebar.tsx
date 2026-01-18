@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import {
   Home,
   Users,
@@ -12,6 +13,8 @@ import {
   UserCircle,
   CreditCard,
   Receipt,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -23,6 +26,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { ROUTES } from '@/routes/paths'
 
@@ -61,6 +67,10 @@ const sales: NavItem[] = [
 
 export function AppSidebar() {
   const location = useLocation()
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState(true)
+  const [isInventoryOpen, setIsInventoryOpen] = useState(true)
+  const [isSuppliersOpen, setIsSuppliersOpen] = useState(true)
+  const [isSalesOpen, setIsSalesOpen] = useState(true)
 
   const renderNavGroup = (items: NavItem[], label: string) => (
     <SidebarGroup>
@@ -94,10 +104,146 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         {renderNavGroup(navigation, 'Dashboard')}
-        {renderNavGroup(userManagement, 'User Management')}
-        {renderNavGroup(inventory, 'Inventory')}
-        {renderNavGroup(suppliers, 'Suppliers')}
-        {renderNavGroup(sales, 'Sales')}
+        <SidebarGroup>
+          <SidebarGroupLabel>User Management</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setIsUserManagementOpen((open) => !open)}
+                  aria-expanded={isUserManagementOpen}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>User Management</span>
+                  {isUserManagementOpen ? (
+                    <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                  )}
+                </SidebarMenuButton>
+                {isUserManagementOpen && (
+                  <SidebarMenuSub>
+                    {userManagement.map((item) => (
+                      <SidebarMenuSubItem key={item.name}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.href}>
+                          <Link to={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Inventory</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setIsInventoryOpen((open) => !open)}
+                  aria-expanded={isInventoryOpen}
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Inventory</span>
+                  {isInventoryOpen ? (
+                    <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                  )}
+                </SidebarMenuButton>
+                {isInventoryOpen && (
+                  <SidebarMenuSub>
+                    {inventory.map((item) => (
+                      <SidebarMenuSubItem key={item.name}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.href}>
+                          <Link to={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Suppliers</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setIsSuppliersOpen((open) => !open)}
+                  aria-expanded={isSuppliersOpen}
+                >
+                  <Truck className="h-4 w-4" />
+                  <span>Suppliers</span>
+                  {isSuppliersOpen ? (
+                    <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                  )}
+                </SidebarMenuButton>
+                {isSuppliersOpen && (
+                  <SidebarMenuSub>
+                    {suppliers.map((item) => (
+                      <SidebarMenuSubItem key={item.name}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.href}>
+                          <Link to={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Sales</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setIsSalesOpen((open) => !open)}
+                  aria-expanded={isSalesOpen}
+                >
+                  <Receipt className="h-4 w-4" />
+                  <span>Sales</span>
+                  {isSalesOpen ? (
+                    <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                  )}
+                </SidebarMenuButton>
+                {isSalesOpen && (
+                  <SidebarMenuSub>
+                    {sales.map((item) => (
+                      <SidebarMenuSubItem key={item.name}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.href}>
+                          <Link to={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.name}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   )
