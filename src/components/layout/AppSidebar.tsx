@@ -105,7 +105,7 @@ export function AppSidebar() {
       <SidebarContent>
         {renderNavGroup(navigation, 'Dashboard')}
         <SidebarGroup>
-          <SidebarGroupLabel>User Management</SidebarGroupLabel>
+         
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -137,11 +137,7 @@ export function AppSidebar() {
                 )}
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Inventory</SidebarGroupLabel>
-          <SidebarGroupContent>
+       
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -172,11 +168,7 @@ export function AppSidebar() {
                 )}
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Suppliers</SidebarGroupLabel>
-          <SidebarGroupContent>
+   
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -207,11 +199,7 @@ export function AppSidebar() {
                 )}
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Sales</SidebarGroupLabel>
-          <SidebarGroupContent>
+        
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
