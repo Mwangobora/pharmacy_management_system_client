@@ -53,6 +53,10 @@ export class CategoriesApi {
     return httpClient.post<Category>(ENDPOINTS.CATEGORIES, payload)
   }
 
+  static async bulkCreate(payload: CategoryCreatePayload[]): Promise<Category[]> {
+    return httpClient.post<Category[]>(`${ENDPOINTS.CATEGORIES}bulk/`, payload)
+  }
+
   static async update(id: string, payload: CategoryUpdatePayload): Promise<Category> {
     return httpClient.patch<Category>(`${ENDPOINTS.CATEGORIES}${id}/`, payload)
   }

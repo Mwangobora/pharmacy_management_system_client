@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
+import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreatePurchase, useUpdatePurchase } from '@/hooks/mutations/usePurchases'
 import type { Purchase } from '@/types/suppliers'
 
@@ -45,9 +46,12 @@ interface PurchaseFormProps {
 export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps) {
   const { data: suppliers = [] } = useSuppliers()
   const safeSuppliers = Array.isArray(suppliers) ? suppliers : []
+  const { data: medicines = [] } = useMedicines()
+  const safeMedicines = Array.isArray(medicines) ? medicines : []
   const createPurchase = useCreatePurchase()
   const updatePurchase = useUpdatePurchase()
   const isEditing = !!purchase
+  const [medicineSearch, setMedicineSearch] = useState('')
 
   const {
     register,
@@ -218,8 +222,48 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                 {fields.map((field, index) => (
                   <div key={field.id} className="grid grid-cols-6 gap-3">
                     <div className="col-span-2 space-y-1">
-                      <Label>Medicine ID</Label>
-                      <Input {...register(`items.${index}.medicine`)} placeholder="Medicine ID" />
+                      <Label>Medicine</Label>
+                      <Select
+                        value={watch(`items.${index}.medicine`) || ''}
+                        onValueChange={(value) => {
+                          setValue(`items.${index}.medicine`, value)
+                          const selected = safeMedicines.find((med) => med.id === value)
+                          if (selected) {
+                            setValue(`items.${index}.unit_price`, String(selected.purchase_price))
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select medicine" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <div className="p-2">
+                            <Input
+                              placeholder="Search medicines..."
+                              value={medicineSearch}
+                              onChange={(event) => setMedicineSearch(event.target.value)}
+                            />
+                          </div>
+                          {safeMedicines
+                            .filter((medicine) =>
+                              `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
+                                .toLowerCase()
+                                .includes(medicineSearch.toLowerCase())
+                            )
+                            .map((medicine) => (
+                              <SelectItem key={medicine.id} value={medicine.id}>
+                                <div className="flex w-full items-center justify-between gap-2">
+                                  <span>
+                                    {medicine.name} ({medicine.batch_number})
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Stock: {medicine.stock_quantity}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-1">
                       <Label>Qty</Label>

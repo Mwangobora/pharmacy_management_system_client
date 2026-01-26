@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,10 +15,12 @@ import { useDeleteCategory } from '@/hooks/mutations/useCategories'
 import type { Category } from '@/types/inventory'
 import { CategoryForm } from '@/components/categories/CategoryForm'
 import { CategoryDetail } from '@/components/categories/CategoryDetail'
+import { CategoryBulkForm } from '@/components/categories/CategoryBulkForm'
 
 export default function CategoriesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -81,7 +83,16 @@ export default function CategoriesPage() {
       <PageHeader
         title="Categories"
         description="Manage medicine categories"
-        action={<Button onClick={() => { setSelectedCategory(null); setFormOpen(true) }}><Plus className="mr-2 h-4 w-4" /> Add Category</Button>}
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setBulkOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" /> Bulk Add
+            </Button>
+            <Button onClick={() => { setSelectedCategory(null); setFormOpen(true) }}>
+              <Plus className="mr-2 h-4 w-4" /> Add Category
+            </Button>
+          </div>
+        }
       />
 
       <div className="flex items-center gap-4">
@@ -93,6 +104,7 @@ export default function CategoriesPage() {
       <DataTable columns={columns} data={categories} isLoading={isLoading} keyExtractor={(item) => item.id} emptyMessage="No categories found" />
 
       <CategoryForm open={formOpen} onOpenChange={setFormOpen} category={selectedCategory} />
+      <CategoryBulkForm open={bulkOpen} onOpenChange={setBulkOpen} />
       <CategoryDetail open={detailOpen} onOpenChange={setDetailOpen} category={selectedCategory} />
       <ConfirmDialog
         open={!!deleteId}

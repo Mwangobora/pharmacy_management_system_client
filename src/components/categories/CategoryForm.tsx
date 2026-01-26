@@ -18,7 +18,6 @@ import type { Category } from '@/types/inventory'
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
-  code: z.string().optional(),
   display_order: z.coerce.number().min(0).default(0),
   is_active: z.boolean().default(true),
 })
@@ -45,7 +44,7 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', description: '', code: '', display_order: 0, is_active: true },
+    defaultValues: { name: '', description: '', display_order: 0, is_active: true },
   })
 
   useEffect(() => {
@@ -53,12 +52,11 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
       reset({
         name: category.name,
         description: category.description || '',
-        code: category.code || '',
         display_order: category.display_order,
         is_active: category.is_active,
       })
     } else {
-      reset({ name: '', description: '', code: '', display_order: 0, is_active: true })
+      reset({ name: '', description: '', display_order: 0, is_active: true })
     }
   }, [category, reset])
 
@@ -92,10 +90,6 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
           <Textarea id="description" {...register('description')} />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="code">Code</Label>
-            <Input id="code" {...register('code')} placeholder="Auto-generated if empty" />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="display_order">Display Order</Label>
             <Input id="display_order" type="number" {...register('display_order')} />

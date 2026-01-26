@@ -14,6 +14,17 @@ export function useCreateCategory() {
   })
 }
 
+export function useBulkCreateCategories() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: CategoryCreatePayload[]) => CategoriesApi.bulkCreate(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() })
+    },
+  })
+}
+
 export function useUpdateCategory() {
   const queryClient = useQueryClient()
 
