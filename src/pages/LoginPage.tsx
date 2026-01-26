@@ -42,9 +42,19 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     try {
-      const tokens = await AuthApi.login(data)
-      const user = { id: '', username: data.email.split('@')[0], email: data.email, is_active: true, is_staff: false, created_at: new Date().toISOString() }
-      login(user, tokens)
+      const response = await AuthApi.login(data)
+      // The response now includes both tokens and user data with permissions
+      const { user, access, refresh } = response
+      const tokens = { access, refresh }
+      
+      if (user) {
+        login(user, tokens)
+      } else {
+        // Fallback if user data is not in response
+        const fetchedUser = await AuthApi.getCurrentUser()
+        login(fetchedUser, tokens)
+      }
+      
       toast.success('Login successful')
       navigate(from, { replace: true })
     } catch (error) {

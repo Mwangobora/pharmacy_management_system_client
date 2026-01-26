@@ -5,6 +5,7 @@ export interface User {
   role?: string | null
   role_name?: string | null
   role_detail?: RoleDetail | null
+  permissions?: string[]
   is_active: boolean
   is_staff: boolean
   created_at: string
@@ -41,6 +42,7 @@ export interface RegisterPayload {
 export interface AuthTokens {
   access: string
   refresh: string
+  user?: User
 }
 
 export interface RefreshTokenPayload {

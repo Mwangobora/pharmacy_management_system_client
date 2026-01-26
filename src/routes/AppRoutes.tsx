@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './ProtectedRoute'
+import { RoleGuard } from './RoleGuard'
 import { ROUTES } from './paths'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
@@ -37,20 +38,36 @@ export function AppRoutes() {
           <Route path={ROUTES.DASHBOARD} element={<DashboardLayout />}>
             <Route index element={<Navigate to={ROUTES.HOME} replace />} />
             <Route path="home" element={<HomePage />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="roles" element={<RolesPage />} />
-            <Route path="permissions" element={<PermissionsPage />} />
-            <Route path="categories" element={<CategoriesPage />} />
-            <Route path="medicines" element={<MedicinesPage />} />
-            <Route path="stock-transactions" element={<StockTransactionsPage />} />
-            <Route path="suppliers" element={<SuppliersPage />} />
-            <Route path="purchases" element={<PurchasesPage />} />
-            <Route path="purchases/:id" element={<PurchaseDetailPage />} />
-            <Route path="customers" element={<CustomersPage />} />
-            <Route path="sales" element={<SalesPage />} />
-            <Route path="sales/:id" element={<SaleDetailPage />} />
-            <Route path="payments" element={<PaymentsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            
+            {/* User Management Routes - Require user management permissions */}
+            <Route element={<RoleGuard requiredPermissions={['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'view_permission']} />}>
+              <Route path="users" element={<UsersPage />} />
+              <Route path="roles" element={<RolesPage />} />
+              <Route path="permissions" element={<PermissionsPage />} />
+            </Route>
+            
+            {/* Inventory Routes - Require inventory permissions */}
+            <Route element={<RoleGuard requiredPermissions={['view_category', 'view_medicine', 'view_stocktransaction']} />}>
+              <Route path="categories" element={<CategoriesPage />} />
+              <Route path="medicines" element={<MedicinesPage />} />
+              <Route path="stock-transactions" element={<StockTransactionsPage />} />
+            </Route>
+            
+            {/* Supplier Routes - Require supplier/purchase permissions */}
+            <Route element={<RoleGuard requiredPermissions={['view_supplier', 'view_purchase']} />}>
+              <Route path="suppliers" element={<SuppliersPage />} />
+              <Route path="purchases" element={<PurchasesPage />} />
+              <Route path="purchases/:id" element={<PurchaseDetailPage />} />
+            </Route>
+            
+            {/* Sales Routes - Require sales permissions */}
+            <Route element={<RoleGuard requiredPermissions={['view_customer', 'view_sale', 'view_payment']} />}>
+              <Route path="customers" element={<CustomersPage />} />
+              <Route path="sales" element={<SalesPage />} />
+              <Route path="sales/:id" element={<SaleDetailPage />} />
+              <Route path="payments" element={<PaymentsPage />} />
+            </Route>
           </Route>
         </Route>
 

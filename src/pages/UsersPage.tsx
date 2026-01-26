@@ -10,6 +10,7 @@ import { DataTable, type Column } from '@/components/DataTable'
 import { SearchInput } from '@/components/SearchInput'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { ErrorState } from '@/components/ErrorState'
+import { PermissionGuard } from '@/components/PermissionGuard'
 import { UserForm } from '@/components/users/UserForm'
 import { UserDetail } from '@/components/users/UserDetail'
 import { useUsers } from '@/hooks/queries/useUsers'
@@ -67,9 +68,15 @@ export default function UsersPage() {
       className: 'w-[100px]',
       cell: (item) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => handleView(item)}><Eye className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4" /></Button>
+          <PermissionGuard anyPermissions={['view_user']}>
+            <Button variant="ghost" size="icon" onClick={() => handleView(item)}><Eye className="h-4 w-4" /></Button>
+          </PermissionGuard>
+          <PermissionGuard anyPermissions={['change_user']}>
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="h-4 w-4" /></Button>
+          </PermissionGuard>
+          <PermissionGuard anyPermissions={['delete_user']}>
+            <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4" /></Button>
+          </PermissionGuard>
         </div>
       ),
     },
@@ -83,9 +90,11 @@ export default function UsersPage() {
         title="Users"
         description="Manage staff accounts and access"
         action={
-          <Button onClick={() => { setSelectedUser(null); setFormOpen(true) }}>
-            <Plus className="mr-2 h-4 w-4" /> Add User
-          </Button>
+          <PermissionGuard anyPermissions={['add_user']}>
+            <Button onClick={() => { setSelectedUser(null); setFormOpen(true) }}>
+              <Plus className="mr-2 h-4 w-4" /> Add User
+            </Button>
+          </PermissionGuard>
         }
       />
 
