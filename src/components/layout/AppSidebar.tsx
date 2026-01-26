@@ -32,12 +32,12 @@ import {
 } from '@/components/ui/sidebar'
 import { ROUTES } from '@/routes/paths'
 import { PermissionGuard } from '@/components/PermissionGuard'
-import { usePermission } from '@/hooks/usePermissions'
 
 type NavItem = {
   name: string
   href: string
   icon: typeof Home
+  iconClass: string
   permission?: string
   anyPermissions?: string[]
 }
@@ -45,55 +45,60 @@ type NavItem = {
 type NavSection = {
   name: string
   icon: typeof Home
+  iconClass: string
   permission?: string
   anyPermissions?: string[]
   items: NavItem[]
 }
 
 const navigation: NavItem[] = [
-  { name: 'Home', href: ROUTES.HOME, icon: Home },
+  { name: 'Home', href: ROUTES.HOME, icon: Home, iconClass: 'text-sky-500 dark:text-sky-400' },
 ]
 
 const userManagementSection: NavSection = {
   name: 'User Management',
   icon: Users,
+  iconClass: 'text-indigo-500 dark:text-indigo-400',
   anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'add_role', 'change_role', 'delete_role', 'view_permission'],
   items: [
-    { name: 'Users', href: ROUTES.USERS, icon: Users, anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user'] },
-    { name: 'Roles', href: ROUTES.ROLES, icon: Shield, anyPermissions: ['view_role', 'add_role', 'change_role', 'delete_role'] },
-    { name: 'Permissions', href: ROUTES.PERMISSIONS, icon: Key, anyPermissions: ['view_permission', 'add_permission', 'change_permission', 'delete_permission'] },
+    { name: 'Users', href: ROUTES.USERS, icon: Users, iconClass: 'text-indigo-500 dark:text-indigo-400', anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user'] },
+    { name: 'Roles', href: ROUTES.ROLES, icon: Shield, iconClass: 'text-emerald-500 dark:text-emerald-400', anyPermissions: ['view_role', 'add_role', 'change_role', 'delete_role'] },
+    { name: 'Permissions', href: ROUTES.PERMISSIONS, icon: Key, iconClass: 'text-amber-500 dark:text-amber-400', anyPermissions: ['view_permission', 'add_permission', 'change_permission', 'delete_permission'] },
   ],
 }
 
 const inventorySection: NavSection = {
   name: 'Inventory',
   icon: Package,
+  iconClass: 'text-teal-500 dark:text-teal-400',
   anyPermissions: ['view_category', 'view_medicine', 'view_stocktransaction', 'add_medicine', 'change_medicine'],
   items: [
-    { name: 'Categories', href: ROUTES.CATEGORIES, icon: Package, anyPermissions: ['view_category', 'add_category', 'change_category', 'delete_category'] },
-    { name: 'Medicines', href: ROUTES.MEDICINES, icon: Pill, anyPermissions: ['view_medicine', 'add_medicine', 'change_medicine', 'delete_medicine'] },
-    { name: 'Stock Transactions', href: ROUTES.STOCK_TRANSACTIONS, icon: ArrowLeftRight, anyPermissions: ['view_stocktransaction', 'add_stocktransaction'] },
+    { name: 'Categories', href: ROUTES.CATEGORIES, icon: Package, iconClass: 'text-teal-500 dark:text-teal-400', anyPermissions: ['view_category', 'add_category', 'change_category', 'delete_category'] },
+    { name: 'Medicines', href: ROUTES.MEDICINES, icon: Pill, iconClass: 'text-lime-500 dark:text-lime-400', anyPermissions: ['view_medicine', 'add_medicine', 'change_medicine', 'delete_medicine'] },
+    { name: 'Stock Transactions', href: ROUTES.STOCK_TRANSACTIONS, icon: ArrowLeftRight, iconClass: 'text-cyan-500 dark:text-cyan-400', anyPermissions: ['view_stocktransaction', 'add_stocktransaction'] },
   ],
 }
 
 const suppliersSection: NavSection = {
   name: 'Suppliers',
   icon: Truck,
+  iconClass: 'text-orange-500 dark:text-orange-400',
   anyPermissions: ['view_supplier', 'view_purchase', 'add_purchase', 'change_purchase'],
   items: [
-    { name: 'Suppliers', href: ROUTES.SUPPLIERS, icon: Truck, anyPermissions: ['view_supplier', 'add_supplier', 'change_supplier', 'delete_supplier'] },
-    { name: 'Purchases', href: ROUTES.PURCHASES, icon: ShoppingCart, anyPermissions: ['view_purchase', 'add_purchase', 'change_purchase', 'delete_purchase'] },
+    { name: 'Suppliers', href: ROUTES.SUPPLIERS, icon: Truck, iconClass: 'text-orange-500 dark:text-orange-400', anyPermissions: ['view_supplier', 'add_supplier', 'change_supplier', 'delete_supplier'] },
+    { name: 'Purchases', href: ROUTES.PURCHASES, icon: ShoppingCart, iconClass: 'text-rose-500 dark:text-rose-400', anyPermissions: ['view_purchase', 'add_purchase', 'change_purchase', 'delete_purchase'] },
   ],
 }
 
 const salesSection: NavSection = {
   name: 'Sales',
   icon: Receipt,
+  iconClass: 'text-fuchsia-500 dark:text-fuchsia-400',
   anyPermissions: ['view_customer', 'view_sale', 'add_sale', 'view_payment'],
   items: [
-    { name: 'Customers', href: ROUTES.CUSTOMERS, icon: UserCircle, anyPermissions: ['view_customer', 'add_customer', 'change_customer', 'delete_customer'] },
-    { name: 'Sales', href: ROUTES.SALES, icon: Receipt, anyPermissions: ['view_sale', 'add_sale', 'change_sale', 'delete_sale'] },
-    { name: 'Payments', href: ROUTES.PAYMENTS, icon: CreditCard, anyPermissions: ['view_payment', 'add_payment', 'change_payment'] },
+    { name: 'Customers', href: ROUTES.CUSTOMERS, icon: UserCircle, iconClass: 'text-purple-500 dark:text-purple-400', anyPermissions: ['view_customer', 'add_customer', 'change_customer', 'delete_customer'] },
+    { name: 'Sales', href: ROUTES.SALES, icon: Receipt, iconClass: 'text-fuchsia-500 dark:text-fuchsia-400', anyPermissions: ['view_sale', 'add_sale', 'change_sale', 'delete_sale'] },
+    { name: 'Payments', href: ROUTES.PAYMENTS, icon: CreditCard, iconClass: 'text-blue-500 dark:text-blue-400', anyPermissions: ['view_payment', 'add_payment', 'change_payment'] },
   ],
 }
 
@@ -113,7 +118,7 @@ export function AppSidebar() {
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild isActive={location.pathname === item.href}>
                 <Link to={item.href}>
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className={`h-4 w-4 ${item.iconClass}`} />
                   <span>{item.name}</span>
                 </Link>
               </SidebarMenuButton>
@@ -144,7 +149,7 @@ export function AppSidebar() {
             onClick={() => setIsOpen(!isOpen)}
             aria-expanded={isOpen}
           >
-            <section.icon className="h-4 w-4" />
+            <section.icon className={`h-4 w-4 ${section.iconClass}`} />
             <span>{section.name}</span>
             {isOpen ? (
               <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
@@ -163,7 +168,7 @@ export function AppSidebar() {
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild isActive={location.pathname === item.href}>
                       <Link to={item.href}>
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className={`h-4 w-4 ${item.iconClass}`} />
                         <span>{item.name}</span>
                       </Link>
                     </SidebarMenuSubButton>
