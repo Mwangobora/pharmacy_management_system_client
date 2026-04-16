@@ -8,16 +8,16 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
+import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { useCreateUser, useUpdateUser } from '@/hooks/mutations/useUsers'
 import { useRoles } from '@/hooks/queries/useRoles'
 import type { User } from '@/types/auth'
 
 const schema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  email: z.string().email('Invalid email'),
+  username: z.string().trim().min(1, 'Username is required'),
+  email: z.string().trim().email('Enter a valid email'),
   password: z.string().optional(),
   role: z.string().optional(),
 })
@@ -46,6 +46,8 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       username: '',
       email: '',
@@ -62,9 +64,10 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
         password: '',
         role: user.role ? String(user.role) : '',
       })
-    } else {
-      reset({ username: '', email: '', password: '', role: '' })
+      return
     }
+
+    reset({ username: '', email: '', password: '', role: '' })
   }, [user, reset])
 
   const onSubmit = async (data: FormData) => {
@@ -85,6 +88,7 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
           toast.error('Password is required')
           return
         }
+
         await createUser.mutateAsync({
           username: data.username,
           email: data.email,
@@ -109,49 +113,67 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
       description="Create or update user accounts"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input id="username" {...register('username')} />
-            {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email')} />
-            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-          </div>
-        </div>
-        {!isEditing && (
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" {...register('password')} />
-          </div>
-        )}
-        <div className="space-y-2">
-          <Label>Role</Label>
-          <Select value={watch('role') || 'none'} onValueChange={(v) => setValue('role', v === 'none' ? '' : v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No role</SelectItem>
-              {safeRoles.map((role) => (
-                <SelectItem key={role.id} value={String(role.id)}>
-                  {role.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? 'Update' : 'Create'}
-          </Button>
-        </div>
+        <FormLayout>
+          <FormSection title="Account Details">
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper
+                label="Username"
+                htmlFor="username"
+                error={errors.username?.message}
+              >
+                <Input id="username" placeholder="john.doe" {...register('username')} />
+              </FormFieldWrapper>
+
+              <FormFieldWrapper
+                label="Email"
+                htmlFor="email"
+                error={errors.email?.message}
+              >
+                <Input id="email" type="email" placeholder="name@company.com" {...register('email')} />
+              </FormFieldWrapper>
+            </div>
+
+            {!isEditing && (
+              <FormFieldWrapper
+                label="Password"
+                htmlFor="password"
+                helperText="Use at least 8 characters."
+                error={errors.password?.message}
+              >
+                <Input id="password" type="password" placeholder="Secure password" {...register('password')} />
+              </FormFieldWrapper>
+            )}
+
+            <FormFieldWrapper label="Role" error={errors.role?.message}>
+              <Select
+                value={watch('role') || 'none'}
+                onValueChange={(value) => setValue('role', value === 'none' ? '' : value, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Assign role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No role</SelectItem>
+                  {safeRoles.map((role) => (
+                    <SelectItem key={role.id} value={String(role.id)}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormFieldWrapper>
+          </FormSection>
+
+          <FormActions>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'Update User' : 'Create User'}
+            </Button>
+          </FormActions>
+        </FormLayout>
       </form>
     </ResponsiveModal>
   )

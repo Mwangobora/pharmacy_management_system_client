@@ -8,9 +8,9 @@ import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
@@ -19,7 +19,7 @@ import type { Purchase } from '@/types/suppliers'
 
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
-  quantity: z.coerce.number().min(1, 'Quantity is required'),
+  quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   unit_price: z.string().min(1, 'Unit price is required'),
   discount_percent: z.string().optional(),
   tax_percent: z.string().optional(),
@@ -27,7 +27,7 @@ const itemSchema = z.object({
 
 const schema = z.object({
   supplier: z.string().min(1, 'Supplier is required'),
-  invoice_number: z.string().min(1, 'Invoice number is required'),
+  invoice_number: z.string().trim().min(1, 'Invoice number is required'),
   purchase_date: z.string().min(1, 'Purchase date is required'),
   tax_amount: z.string().optional(),
   discount_amount: z.string().optional(),
@@ -35,7 +35,8 @@ const schema = z.object({
   items: z.array(itemSchema).default([]),
 })
 
-type FormData = z.input<typeof schema>
+type FormValues = z.input<typeof schema>
+type FormData = z.output<typeof schema>
 
 interface PurchaseFormProps {
   open: boolean
@@ -61,8 +62,10 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
     watch,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormValues, unknown, FormData>({
     resolver: zodResolver(schema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       supplier: '',
       invoice_number: '',
@@ -90,17 +93,18 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
         notes: purchase.notes || '',
         items: [],
       })
-    } else {
-      reset({
-        supplier: '',
-        invoice_number: '',
-        purchase_date: '',
-        tax_amount: '',
-        discount_amount: '',
-        notes: '',
-        items: [],
-      })
+      return
     }
+
+    reset({
+      supplier: '',
+      invoice_number: '',
+      purchase_date: '',
+      tax_amount: '',
+      discount_amount: '',
+      notes: '',
+      items: [],
+    })
   }, [purchase, reset])
 
   const onSubmit = async (data: FormData) => {
@@ -130,7 +134,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
           tax_amount: data.tax_amount || undefined,
           discount_amount: data.discount_amount || undefined,
           notes: data.notes || undefined,
-          items: data.items || [],
+          items: data.items,
         })
         toast.success('Purchase created successfully')
       }
@@ -147,161 +151,153 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? 'Edit Purchase' : 'Add Purchase'}
-      description="Fill in the purchase details"
+      description="Fill in purchase details"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Supplier</Label>
-            <Select
-              value={watch('supplier')}
-              onValueChange={(v) => setValue('supplier', v)}
-              disabled={isEditing}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select supplier" />
-              </SelectTrigger>
-              <SelectContent>
-                {safeSuppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.supplier && <p className="text-sm text-destructive">{errors.supplier.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="invoice_number">Invoice Number</Label>
-            <Input id="invoice_number" {...register('invoice_number')} />
-            {errors.invoice_number && <p className="text-sm text-destructive">{errors.invoice_number.message}</p>}
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="purchase_date">Purchase Date</Label>
-            <Input id="purchase_date" type="date" {...register('purchase_date')} />
-            {errors.purchase_date && <p className="text-sm text-destructive">{errors.purchase_date.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tax_amount">Tax Amount</Label>
-            <Input id="tax_amount" {...register('tax_amount')} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="discount_amount">Discount Amount</Label>
-            <Input id="discount_amount" {...register('discount_amount')} />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea id="notes" {...register('notes')} />
-        </div>
+        <FormLayout>
+          <FormSection title="Purchase Details">
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper label="Supplier" error={errors.supplier?.message}>
+                <Select
+                  value={watch('supplier')}
+                  onValueChange={(value) => setValue('supplier', value, { shouldValidate: true })}
+                  disabled={isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {safeSuppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormFieldWrapper>
 
-        {!isEditing && (
-          <div className="space-y-3 rounded-md border p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Items</p>
-                <p className="text-xs text-muted-foreground">Add medicines for this purchase</p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  append({ medicine: '', quantity: 1, unit_price: '', discount_percent: '', tax_percent: '' })
-                }
-              >
-                <Plus className="mr-2 h-4 w-4" /> Add Item
-              </Button>
+              <FormFieldWrapper label="Invoice Number" htmlFor="invoice_number" error={errors.invoice_number?.message}>
+                <Input id="invoice_number" placeholder="INV-2026-001" {...register('invoice_number')} />
+              </FormFieldWrapper>
             </div>
-            {fields.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No items added yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="grid grid-cols-6 gap-3">
-                    <div className="col-span-2 space-y-1">
-                      <Label>Medicine</Label>
-                      <Select
-                        value={watch(`items.${index}.medicine`) || ''}
-                        onValueChange={(value) => {
-                          setValue(`items.${index}.medicine`, value)
-                          const selected = safeMedicines.find((med) => med.id === value)
-                          if (selected) {
-                            setValue(`items.${index}.unit_price`, String(selected.purchase_price))
-                          }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select medicine" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <div className="p-2">
-                            <Input
-                              placeholder="Search medicines..."
-                              value={medicineSearch}
-                              onChange={(event) => setMedicineSearch(event.target.value)}
-                            />
-                          </div>
-                          {safeMedicines
-                            .filter((medicine) =>
-                              `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
-                                .toLowerCase()
-                                .includes(medicineSearch.toLowerCase())
-                            )
-                            .map((medicine) => (
-                              <SelectItem key={medicine.id} value={medicine.id}>
-                                <div className="flex w-full items-center justify-between gap-2">
-                                  <span>
-                                    {medicine.name} ({medicine.batch_number})
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Stock: {medicine.stock_quantity}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label>Qty</Label>
-                      <Input type="number" {...register(`items.${index}.quantity`)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label>Unit Price</Label>
-                      <Input {...register(`items.${index}.unit_price`)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label>Discount %</Label>
-                      <Input {...register(`items.${index}.discount_percent`)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label>Tax %</Label>
-                      <Input {...register(`items.${index}.tax_percent`)} />
-                    </div>
-                    <div className="flex items-end justify-end">
-                      <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditing ? 'Update' : 'Create'}
-          </Button>
-        </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <FormFieldWrapper label="Purchase Date" htmlFor="purchase_date" error={errors.purchase_date?.message}>
+                <Input id="purchase_date" type="date" {...register('purchase_date')} />
+              </FormFieldWrapper>
+              <FormFieldWrapper label="Tax Amount" htmlFor="tax_amount">
+                <Input id="tax_amount" placeholder="0.00" {...register('tax_amount')} />
+              </FormFieldWrapper>
+              <FormFieldWrapper label="Discount Amount" htmlFor="discount_amount">
+                <Input id="discount_amount" placeholder="0.00" {...register('discount_amount')} />
+              </FormFieldWrapper>
+            </div>
+
+            <FormFieldWrapper label="Notes" htmlFor="notes">
+              <Textarea id="notes" placeholder="Optional purchase notes" {...register('notes')} />
+            </FormFieldWrapper>
+          </FormSection>
+
+          {!isEditing && (
+            <FormSection title="Purchase Items" description="Add one or more medicines to this purchase.">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">Line items drive stock updates on submit.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ medicine: '', quantity: 1, unit_price: '', discount_percent: '', tax_percent: '' })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
+              </div>
+
+              {fields.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
+                  No items added yet.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="rounded-lg border border-border/60 p-3">
+                      <div className="grid gap-3 md:grid-cols-6">
+                        <FormFieldWrapper label="Medicine" className="md:col-span-2" error={errors.items?.[index]?.medicine?.message}>
+                          <Select
+                            value={watch(`items.${index}.medicine`) || ''}
+                            onValueChange={(value) => {
+                              setValue(`items.${index}.medicine`, value, { shouldValidate: true })
+                              const selected = safeMedicines.find((medicine) => medicine.id === value)
+                              if (selected) {
+                                setValue(`items.${index}.unit_price`, String(selected.purchase_price), { shouldValidate: true })
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select medicine" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <div className="p-2">
+                                <Input
+                                  placeholder="Search medicine"
+                                  value={medicineSearch}
+                                  onChange={(event) => setMedicineSearch(event.target.value)}
+                                />
+                              </div>
+                              {safeMedicines
+                                .filter((medicine) =>
+                                  `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
+                                    .toLowerCase()
+                                    .includes(medicineSearch.toLowerCase()),
+                                )
+                                .map((medicine) => (
+                                  <SelectItem key={medicine.id} value={medicine.id}>
+                                    {medicine.name} ({medicine.batch_number})
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </FormFieldWrapper>
+
+                        <FormFieldWrapper label="Qty" error={errors.items?.[index]?.quantity?.message}>
+                          <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
+                        </FormFieldWrapper>
+
+                        <FormFieldWrapper label="Unit Price" error={errors.items?.[index]?.unit_price?.message}>
+                          <Input placeholder="0.00" {...register(`items.${index}.unit_price`)} />
+                        </FormFieldWrapper>
+
+                        <FormFieldWrapper label="Discount %">
+                          <Input placeholder="0" {...register(`items.${index}.discount_percent`)} />
+                        </FormFieldWrapper>
+
+                        <FormFieldWrapper label="Tax %">
+                          <Input placeholder="0" {...register(`items.${index}.tax_percent`)} />
+                        </FormFieldWrapper>
+                      </div>
+
+                      <div className="mt-2 flex justify-end">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </FormSection>
+          )}
+
+          <FormActions>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'Update Purchase' : 'Create Purchase'}
+            </Button>
+          </FormActions>
+        </FormLayout>
       </form>
     </ResponsiveModal>
   )

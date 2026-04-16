@@ -3,81 +3,85 @@
 @tailwind utilities;
 
 :root {
-  --background: 77 72% 94%;
-  --foreground: 0 0% 3.9%;
-  --card: 77 72% 94%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 77 72% 94%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 207 100% 50%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 77 30% 92%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 77 30% 92%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 77 30% 92%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
+  --background: 210 33% 99%;
+  --foreground: 224 24% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 24% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 24% 14%;
+  --primary: 213 89% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 20% 96%;
+  --secondary-foreground: 222 27% 20%;
+  --muted: 220 22% 95%;
+  --muted-foreground: 215 16% 44%;
+  --accent: 216 33% 96%;
+  --accent-foreground: 222 27% 18%;
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 77 20% 85%;
-  --input: 77 20% 85%;
-  --ring: 207 100% 50%;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-  --radius: 0.5rem;
-  --sidebar: 77 72% 94%;
-  --sidebar-foreground: 0 0% 3.9%;
-  --sidebar-primary: 207 100% 50%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 77 30% 92%;
-  --sidebar-accent-foreground: 0 0% 9%;
-  --sidebar-border: 77 20% 85%;
-  --sidebar-ring: 207 100% 50%;
+  --border: 216 20% 89%;
+  --input: 216 20% 89%;
+  --ring: 213 89% 53%;
+  --chart-1: 221 83% 58%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 28 89% 57%;
+  --chart-4: 350 86% 59%;
+  --chart-5: 266 76% 61%;
+  --radius: 0.75rem;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 224 24% 14%;
+  --sidebar-primary: 213 89% 53%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 216 33% 96%;
+  --sidebar-accent-foreground: 222 27% 18%;
+  --sidebar-border: 216 20% 89%;
+  --sidebar-ring: 213 89% 53%;
 }
 
 .dark {
-  --background: 210 100% 12%;
-  --foreground: 0 0% 98%;
-  --card: 210 100% 12%;
-  --card-foreground: 0 0% 98%;
-  --popover: 210 100% 12%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 210 28% 18%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 210 28% 18%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 210 28% 18%;
-  --accent-foreground: 0 0% 98%;
+  --background: 220 28% 9%;
+  --foreground: 210 20% 96%;
+  --card: 220 26% 11%;
+  --card-foreground: 210 20% 96%;
+  --popover: 220 26% 11%;
+  --popover-foreground: 210 20% 96%;
+  --primary: 212 96% 67%;
+  --primary-foreground: 220 50% 10%;
+  --secondary: 220 18% 16%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 220 17% 17%;
+  --muted-foreground: 214 15% 68%;
+  --accent: 220 18% 20%;
+  --accent-foreground: 210 20% 96%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 210 28% 28%;
-  --input: 210 28% 24%;
-  --ring: 0 0% 83.1%;
+  --border: 219 17% 22%;
+  --input: 219 17% 22%;
+  --ring: 212 96% 67%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
-  --sidebar: 210 100% 12%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 0 0% 98%;
-  --sidebar-primary-foreground: 0 0% 9%;
-  --sidebar-accent: 0 0% 14.9%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-border: 0 0% 14.9%;
-  --sidebar-ring: 0 0% 83.1%;
+  --chart-4: 350 72% 58%;
+  --chart-5: 270 62% 62%;
+  --sidebar: 220 26% 10%;
+  --sidebar-foreground: 210 20% 96%;
+  --sidebar-primary: 212 96% 67%;
+  --sidebar-primary-foreground: 220 50% 10%;
+  --sidebar-accent: 220 18% 18%;
+  --sidebar-accent-foreground: 210 20% 96%;
+  --sidebar-border: 219 17% 22%;
+  --sidebar-ring: 212 96% 67%;
 }
 
 @layer base {
   * {
     @apply border-border;
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 180ms;
+    transition-timing-function: ease;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }

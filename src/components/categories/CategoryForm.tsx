@@ -8,21 +8,21 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateCategory, useUpdateCategory } from '@/hooks/mutations/useCategories'
 import type { Category } from '@/types/inventory'
 
 const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().trim().min(1, 'Category name is required'),
   description: z.string().optional(),
-  display_order: z.coerce.number().min(0).default(0),
+  display_order: z.coerce.number().min(0, 'Display order cannot be negative').default(0),
   is_active: z.boolean().default(true),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.input<typeof schema>
 
 interface CategoryFormProps {
   open: boolean
@@ -44,6 +44,8 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: { name: '', description: '', display_order: 0, is_active: true },
   })
 
@@ -55,18 +57,32 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
         display_order: category.display_order,
         is_active: category.is_active,
       })
-    } else {
-      reset({ name: '', description: '', display_order: 0, is_active: true })
+      return
     }
+
+    reset({ name: '', description: '', display_order: 0, is_active: true })
   }, [category, reset])
 
   const onSubmit = async (data: FormData) => {
     try {
       if (isEditing) {
-        await updateCategory.mutateAsync({ id: category.id, payload: data })
+        await updateCategory.mutateAsync({
+          id: category.id,
+          payload: {
+            name: data.name,
+            description: data.description,
+            display_order: Number(data.display_order),
+            is_active: data.is_active,
+          },
+        })
         toast.success('Category updated successfully')
       } else {
-        await createCategory.mutateAsync(data)
+        await createCategory.mutateAsync({
+          name: data.name,
+          description: data.description,
+          display_order: Number(data.display_order),
+          is_active: data.is_active,
+        })
         toast.success('Category created successfully')
       }
       onOpenChange(false)
@@ -78,31 +94,49 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
   const isLoading = createCategory.isPending || updateCategory.isPending
 
   return (
-    <ResponsiveModal open={open} onOpenChange={onOpenChange} title={isEditing ? 'Edit Category' : 'Add Category'} description="Fill in the category details">
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? 'Edit Category' : 'Add Category'}
+      description="Create or update product categories"
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" {...register('name')} />
-          {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea id="description" {...register('description')} />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="display_order">Display Order</Label>
-            <Input id="display_order" type="number" {...register('display_order')} />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch id="is_active" checked={watch('is_active')} onCheckedChange={(v) => setValue('is_active', v)} />
-          <Label htmlFor="is_active">Active</Label>
-        </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button type="submit" disabled={isLoading}>{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isEditing ? 'Update' : 'Create'}</Button>
-        </div>
+        <FormLayout>
+          <FormSection title="Category Details">
+            <FormFieldWrapper label="Category Name" htmlFor="name" error={errors.name?.message}>
+              <Input id="name" placeholder="Analgesics" {...register('name')} />
+            </FormFieldWrapper>
+
+            <FormFieldWrapper label="Description" htmlFor="description" error={errors.description?.message}>
+              <Textarea id="description" placeholder="Short category note" {...register('description')} />
+            </FormFieldWrapper>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper label="Display Order" htmlFor="display_order" error={errors.display_order?.message}>
+                <Input id="display_order" type="number" min={0} placeholder="0" {...register('display_order')} />
+              </FormFieldWrapper>
+
+              <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
+                <span className="text-sm font-medium">Active Category</span>
+                <Switch
+                  id="is_active"
+                  checked={watch('is_active')}
+                  onCheckedChange={(value) => setValue('is_active', value, { shouldValidate: true })}
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <FormActions>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'Update Category' : 'Create Category'}
+            </Button>
+          </FormActions>
+        </FormLayout>
       </form>
     </ResponsiveModal>
   )

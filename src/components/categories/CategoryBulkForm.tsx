@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { useBulkCreateCategories } from '@/hooks/mutations/useCategories'
 import type { CategoryCreatePayload } from '@/types/inventory'
 
@@ -29,13 +30,13 @@ export function CategoryBulkForm({ open, onOpenChange }: CategoryBulkFormProps) 
       }
       return { data, error: '' }
     } catch {
-      return { data: null, error: 'Invalid JSON' }
+      return { data: null, error: 'Invalid JSON format' }
     }
   }, [raw])
 
   const handleSubmit = async () => {
     if (!parsed.data) {
-      toast.error(parsed.error || 'Paste a valid JSON array')
+      toast.error(parsed.error || 'Paste valid JSON data')
       return
     }
     try {
@@ -55,25 +56,31 @@ export function CategoryBulkForm({ open, onOpenChange }: CategoryBulkFormProps) 
       title="Bulk Add Categories"
       description="Paste a JSON array of categories"
     >
-      <div className="space-y-4">
-        <Textarea
-          value={raw}
-          onChange={(e) => setRaw(e.target.value)}
-          placeholder='[{"name":"Analgesics","description":"Pain relieving medicines","code":"ANLG","display_order":1,"is_active":true}]'
-          className="min-h-[220px] font-mono text-xs"
-        />
-        {parsed.error && raw.trim() ? (
-          <p className="text-sm text-destructive">{parsed.error}</p>
-        ) : null}
-        <div className="flex justify-end gap-2">
+      <FormLayout>
+        <FormSection title="Bulk Input" description="Upload category data in JSON format.">
+          <FormFieldWrapper
+            label="JSON Payload"
+            error={parsed.error && raw.trim() ? parsed.error : undefined}
+            helperText='Expected format: [{"name":"Analgesics","display_order":1}]'
+          >
+            <Textarea
+              value={raw}
+              onChange={(event) => setRaw(event.target.value)}
+              placeholder='[{"name":"Analgesics","description":"Pain medicines","display_order":1,"is_active":true}]'
+              className="min-h-[240px] font-mono text-xs"
+            />
+          </FormFieldWrapper>
+        </FormSection>
+
+        <FormActions>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={bulkCreate.isPending}>
-            {bulkCreate.isPending ? 'Uploading...' : 'Upload'}
+            {bulkCreate.isPending ? 'Uploading...' : 'Upload JSON'}
           </Button>
-        </div>
-      </div>
+        </FormActions>
+      </FormLayout>
     </ResponsiveModal>
   )
 }

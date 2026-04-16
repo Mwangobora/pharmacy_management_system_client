@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,9 @@ interface ResponsiveModalProps {
   title: string
   description?: string
   children: ReactNode
+  dialogContentClassName?: string
+  desktopScrollable?: boolean
+  mobileScrollable?: boolean
 }
 
 export function ResponsiveModal({
@@ -32,6 +36,9 @@ export function ResponsiveModal({
   title,
   description,
   children,
+  dialogContentClassName,
+  desktopScrollable = true,
+  mobileScrollable = true,
 }: ResponsiveModalProps) {
   const isMobile = useIsMobile()
 
@@ -43,9 +50,13 @@ export function ResponsiveModal({
             <DrawerTitle>{title}</DrawerTitle>
             {description && <DrawerDescription>{description}</DrawerDescription>}
           </DrawerHeader>
-          <ScrollArea className="max-h-[calc(100vh-200px)] px-4 pb-4">
-            {children}
-          </ScrollArea>
+          {mobileScrollable ? (
+            <ScrollArea className="max-h-[calc(100vh-200px)] px-4 pb-4">
+              {children}
+            </ScrollArea>
+          ) : (
+            <div className="px-4 pb-4">{children}</div>
+          )}
         </DrawerContent>
       </Drawer>
     )
@@ -53,14 +64,22 @@ export function ResponsiveModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-hidden">
+      <DialogContent
+        className={cn(
+          desktopScrollable && 'max-h-[90vh] overflow-hidden',
+          !desktopScrollable && 'overflow-visible',
+          dialogContentClassName,
+        )}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <ScrollArea className="max-h-[calc(90vh-120px)]">
-          {children}
-        </ScrollArea>
+        {desktopScrollable ? (
+          <ScrollArea className="max-h-[calc(90vh-120px)]">{children}</ScrollArea>
+        ) : (
+          <div>{children}</div>
+        )}
       </DialogContent>
     </Dialog>
   )

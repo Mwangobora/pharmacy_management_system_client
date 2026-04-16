@@ -21,7 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider defaultTheme="system" storageKey="pharmacy-theme">
+        <ThemeProvider defaultTheme="light" storageKey="pharmacy-theme">
           <App />
           <Toaster position="top-right" />
         </ThemeProvider>
