@@ -68,7 +68,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60 bg-sidebar/95">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/70 bg-sidebar">
       <SidebarHeader className="border-b border-sidebar-border/70 px-3 py-3">
         <Link to={ROUTES.HOME} className="flex items-center gap-2 rounded-md px-2 py-1.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/90 text-primary-foreground shadow-sm">

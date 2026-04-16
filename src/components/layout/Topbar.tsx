@@ -23,7 +23,7 @@ export function Topbar() {
     <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center border-b border-border/70 bg-background/85 px-4 backdrop-blur-md md:px-6">
       <div className="flex w-full items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="size-9 rounded-lg border border-border/70 bg-background hover:bg-accent" />
+          <SidebarTrigger className="size-9 rounded-lg border border-primary/20 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" />
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Admin Console</p>
             <h1 className="text-sm font-semibold md:text-base">{currentTitle}</h1>

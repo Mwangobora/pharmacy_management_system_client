@@ -63,6 +63,9 @@ export interface PurchaseItemPayload {
   medicine: string
   quantity: number
   unit_price: string
+  batch_number?: string
+  expiry_date?: string
+  manufacture_date?: string
   discount_percent?: string
   tax_percent?: string
 }

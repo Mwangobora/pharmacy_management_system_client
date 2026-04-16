@@ -51,18 +51,18 @@ export type MedicineUnit = 'pieces' | 'tablets' | 'capsules' | 'bottles' | 'boxe
 
 export interface MedicineCreatePayload {
   name: string
-  generic_name: string
+  generic_name?: string
   category: string
   supplier: string
-  batch_number: string
-  manufacture_date: string
+  batch_number?: string
+  manufacture_date?: string
   expiry_date: string
-  purchase_price: string
-  selling_price: string
-  stock_quantity: number
-  min_stock_level: number
-  max_stock_level: number
-  unit: MedicineUnit
+  purchase_price?: string
+  selling_price?: string
+  stock_quantity?: number
+  min_stock_level?: number
+  max_stock_level?: number
+  unit?: MedicineUnit
   storage_location?: string
   barcode?: string
   requires_prescription?: boolean

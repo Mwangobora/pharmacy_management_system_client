@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -20,17 +20,16 @@ import type { Purchase } from '@/types/suppliers'
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  unit_price: z.string().min(1, 'Unit price is required'),
-  discount_percent: z.string().optional(),
-  tax_percent: z.string().optional(),
+  unit_price: z.string().min(1, 'Unit cost is required'),
+  batch_number: z.string().optional(),
+  expiry_date: z.string().optional(),
+  manufacture_date: z.string().optional(),
 })
 
 const schema = z.object({
   supplier: z.string().min(1, 'Supplier is required'),
   invoice_number: z.string().trim().min(1, 'Invoice number is required'),
   purchase_date: z.string().min(1, 'Purchase date is required'),
-  tax_amount: z.string().optional(),
-  discount_amount: z.string().optional(),
   notes: z.string().optional(),
   items: z.array(itemSchema).default([]),
 })
@@ -52,7 +51,6 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
   const createPurchase = useCreatePurchase()
   const updatePurchase = useUpdatePurchase()
   const isEditing = !!purchase
-  const [medicineSearch, setMedicineSearch] = useState('')
 
   const {
     register,
@@ -70,8 +68,6 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
       supplier: '',
       invoice_number: '',
       purchase_date: '',
-      tax_amount: '',
-      discount_amount: '',
       notes: '',
       items: [],
     },
@@ -88,8 +84,6 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
         supplier: purchase.supplier,
         invoice_number: purchase.invoice_number,
         purchase_date: purchase.purchase_date,
-        tax_amount: purchase.tax_amount || '',
-        discount_amount: purchase.discount_amount || '',
         notes: purchase.notes || '',
         items: [],
       })
@@ -100,12 +94,10 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
       supplier: '',
       invoice_number: '',
       purchase_date: '',
-      tax_amount: '',
-      discount_amount: '',
       notes: '',
       items: [],
     })
-  }, [purchase, reset])
+  }, [purchase, reset, open])
 
   const onSubmit = async (data: FormData) => {
     if (!isEditing && (!data.items || data.items.length === 0)) {
@@ -120,8 +112,6 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
           payload: {
             invoice_number: data.invoice_number,
             purchase_date: data.purchase_date,
-            tax_amount: data.tax_amount || undefined,
-            discount_amount: data.discount_amount || undefined,
             notes: data.notes || undefined,
           },
         })
@@ -131,10 +121,15 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
           supplier: data.supplier,
           invoice_number: data.invoice_number,
           purchase_date: data.purchase_date,
-          tax_amount: data.tax_amount || undefined,
-          discount_amount: data.discount_amount || undefined,
           notes: data.notes || undefined,
-          items: data.items,
+          items: data.items.map((item) => ({
+            medicine: item.medicine,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            batch_number: item.batch_number || undefined,
+            expiry_date: item.expiry_date || undefined,
+            manufacture_date: item.manufacture_date || undefined,
+          })),
         })
         toast.success('Purchase created successfully')
       }
@@ -151,10 +146,12 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? 'Edit Purchase' : 'Add Purchase'}
-      description="Fill in purchase details"
+      description="Record supplier purchase and stock intake"
+      dialogContentClassName="sm:max-w-5xl"
+      desktopScrollable
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <FormLayout>
+        <FormLayout className="max-w-none">
           <FormSection title="Purchase Details">
             <div className="grid gap-4 md:grid-cols-2">
               <FormFieldWrapper label="Supplier" error={errors.supplier?.message}>
@@ -176,37 +173,32 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                 </Select>
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Invoice Number" htmlFor="invoice_number" error={errors.invoice_number?.message}>
-                <Input id="invoice_number" placeholder="INV-2026-001" {...register('invoice_number')} />
+              <FormFieldWrapper label="Invoice Number" error={errors.invoice_number?.message}>
+                <Input placeholder="INV-2026-001" {...register('invoice_number')} />
               </FormFieldWrapper>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <FormFieldWrapper label="Purchase Date" htmlFor="purchase_date" error={errors.purchase_date?.message}>
-                <Input id="purchase_date" type="date" {...register('purchase_date')} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper label="Purchase Date" error={errors.purchase_date?.message}>
+                <Input type="date" {...register('purchase_date')} />
               </FormFieldWrapper>
-              <FormFieldWrapper label="Tax Amount" htmlFor="tax_amount">
-                <Input id="tax_amount" placeholder="0.00" {...register('tax_amount')} />
-              </FormFieldWrapper>
-              <FormFieldWrapper label="Discount Amount" htmlFor="discount_amount">
-                <Input id="discount_amount" placeholder="0.00" {...register('discount_amount')} />
+
+              <FormFieldWrapper label="Notes">
+                <Textarea placeholder="Optional notes" {...register('notes')} className="min-h-10" />
               </FormFieldWrapper>
             </div>
-
-            <FormFieldWrapper label="Notes" htmlFor="notes">
-              <Textarea id="notes" placeholder="Optional purchase notes" {...register('notes')} />
-            </FormFieldWrapper>
           </FormSection>
 
           {!isEditing && (
-            <FormSection title="Purchase Items" description="Add one or more medicines to this purchase.">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Line items drive stock updates on submit.</p>
+            <FormSection title="Items" description="Add quantity and unit cost for each medicine.">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-muted-foreground">Stock and cost are updated automatically after saving.</p>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ medicine: '', quantity: 1, unit_price: '', discount_percent: '', tax_percent: '' })}
+                  className="w-full sm:w-auto"
+                  onClick={() => append({ medicine: '', quantity: 1, unit_price: '', batch_number: '', expiry_date: '', manufacture_date: '' })}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
@@ -221,8 +213,8 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                 <div className="space-y-3">
                   {fields.map((field, index) => (
                     <div key={field.id} className="rounded-lg border border-border/60 p-3">
-                      <div className="grid gap-3 md:grid-cols-6">
-                        <FormFieldWrapper label="Medicine" className="md:col-span-2" error={errors.items?.[index]?.medicine?.message}>
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                        <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message}>
                           <Select
                             value={watch(`items.${index}.medicine`) || ''}
                             onValueChange={(value) => {
@@ -230,6 +222,9 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                               const selected = safeMedicines.find((medicine) => medicine.id === value)
                               if (selected) {
                                 setValue(`items.${index}.unit_price`, String(selected.purchase_price), { shouldValidate: true })
+                                setValue(`items.${index}.batch_number`, selected.batch_number || '', { shouldValidate: true })
+                                setValue(`items.${index}.expiry_date`, selected.expiry_date || '', { shouldValidate: true })
+                                setValue(`items.${index}.manufacture_date`, selected.manufacture_date || '', { shouldValidate: true })
                               }
                             }}
                           >
@@ -237,24 +232,11 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                               <SelectValue placeholder="Select medicine" />
                             </SelectTrigger>
                             <SelectContent>
-                              <div className="p-2">
-                                <Input
-                                  placeholder="Search medicine"
-                                  value={medicineSearch}
-                                  onChange={(event) => setMedicineSearch(event.target.value)}
-                                />
-                              </div>
-                              {safeMedicines
-                                .filter((medicine) =>
-                                  `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
-                                    .toLowerCase()
-                                    .includes(medicineSearch.toLowerCase()),
-                                )
-                                .map((medicine) => (
-                                  <SelectItem key={medicine.id} value={medicine.id}>
-                                    {medicine.name} ({medicine.batch_number})
-                                  </SelectItem>
-                                ))}
+                              {safeMedicines.map((medicine) => (
+                                <SelectItem key={medicine.id} value={medicine.id}>
+                                  {medicine.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormFieldWrapper>
@@ -263,16 +245,16 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                           <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
                         </FormFieldWrapper>
 
-                        <FormFieldWrapper label="Unit Price" error={errors.items?.[index]?.unit_price?.message}>
+                        <FormFieldWrapper label="Unit Cost" error={errors.items?.[index]?.unit_price?.message}>
                           <Input placeholder="0.00" {...register(`items.${index}.unit_price`)} />
                         </FormFieldWrapper>
 
-                        <FormFieldWrapper label="Discount %">
-                          <Input placeholder="0" {...register(`items.${index}.discount_percent`)} />
+                        <FormFieldWrapper label="Batch">
+                          <Input placeholder="Optional" {...register(`items.${index}.batch_number`)} />
                         </FormFieldWrapper>
 
-                        <FormFieldWrapper label="Tax %">
-                          <Input placeholder="0" {...register(`items.${index}.tax_percent`)} />
+                        <FormFieldWrapper label="Expiry" className="sm:col-span-2 xl:col-span-1">
+                          <Input type="date" {...register(`items.${index}.expiry_date`)} />
                         </FormFieldWrapper>
                       </div>
 
@@ -294,7 +276,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Update Purchase' : 'Create Purchase'}
+              {isEditing ? 'Update Purchase' : 'Save Purchase'}
             </Button>
           </FormActions>
         </FormLayout>

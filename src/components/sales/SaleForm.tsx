@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -20,20 +20,13 @@ import type { PaymentMethod, Sale } from '@/types/sales'
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  unit_price: z.string().min(1, 'Unit price is required'),
-  batch_number: z.string().min(1, 'Batch number is required'),
 })
 
 const schema = z.object({
   customer: z.string().optional(),
-  sale_date: z.string().optional(),
-  tax_amount: z.string().optional(),
-  discount_amount: z.string().optional(),
   payment_method: z.enum(['cash', 'card', 'mobile', 'insurance', 'credit']),
   notes: z.string().optional(),
   items: z.array(itemSchema).default([]),
-  payment_amount: z.string().optional(),
-  transaction_ref: z.string().optional(),
 })
 
 type FormValues = z.input<typeof schema>
@@ -61,7 +54,6 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
   const createSale = useCreateSale()
   const updateSale = useUpdateSale()
   const isEditing = !!sale
-  const [medicineSearch, setMedicineSearch] = useState('')
 
   const {
     register,
@@ -77,14 +69,9 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
     reValidateMode: 'onChange',
     defaultValues: {
       customer: '',
-      sale_date: '',
-      tax_amount: '',
-      discount_amount: '',
       payment_method: 'cash',
       notes: '',
       items: [],
-      payment_amount: '',
-      transaction_ref: '',
     },
   })
 
@@ -97,30 +84,34 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
     if (sale) {
       reset({
         customer: sale.customer || '',
-        sale_date: sale.sale_date,
-        tax_amount: sale.tax_amount || '',
-        discount_amount: sale.discount_amount || '',
         payment_method: sale.payment_method,
         notes: sale.notes || '',
         items: [],
-        payment_amount: '',
-        transaction_ref: '',
       })
       return
     }
 
     reset({
       customer: '',
-      sale_date: '',
-      tax_amount: '',
-      discount_amount: '',
       payment_method: 'cash',
       notes: '',
       items: [],
-      payment_amount: '',
-      transaction_ref: '',
     })
-  }, [sale, reset])
+  }, [sale, reset, open])
+
+  const watchedItems = watch('items') || []
+
+  const totalsPreview = useMemo(() => {
+    let subtotal = 0
+    for (const item of watchedItems) {
+      const medicine = safeMedicines.find((m) => m.id === item.medicine)
+      if (!medicine) continue
+      const unitPrice = Number(medicine.selling_price)
+      const qty = Number(item.quantity || 0)
+      subtotal += unitPrice * qty
+    }
+    return subtotal
+  }, [watchedItems, safeMedicines])
 
   const onSubmit = async (data: FormData) => {
     if (!isEditing && data.items.length === 0) {
@@ -133,25 +124,21 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
         await updateSale.mutateAsync({
           id: sale.id,
           payload: {
-            sale_date: data.sale_date || undefined,
-            tax_amount: data.tax_amount || undefined,
-            discount_amount: data.discount_amount || undefined,
             payment_method: data.payment_method,
             notes: data.notes || undefined,
+            customer: data.customer || undefined,
           },
         })
         toast.success('Sale updated successfully')
       } else {
         await createSale.mutateAsync({
           customer: data.customer || undefined,
-          sale_date: data.sale_date || undefined,
-          tax_amount: data.tax_amount || undefined,
-          discount_amount: data.discount_amount || undefined,
           payment_method: data.payment_method,
           notes: data.notes || undefined,
-          items: data.items,
-          payment_amount: data.payment_amount || undefined,
-          transaction_ref: data.transaction_ref || undefined,
+          items: data.items.map((item) => ({
+            medicine: item.medicine,
+            quantity: item.quantity,
+          })),
         })
         toast.success('Sale created successfully')
       }
@@ -167,12 +154,14 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? 'Edit Sale' : 'Add Sale'}
-      description="Fill in sale details"
+      title={isEditing ? 'Edit Sale' : 'New Sale'}
+      description="Fast checkout form"
+      dialogContentClassName="sm:max-w-5xl"
+      desktopScrollable={false}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <FormLayout>
-          <FormSection title="Sale Information">
+        <FormLayout className="max-w-none">
+          <FormSection title="Sale Details">
             <div className="grid gap-4 md:grid-cols-2">
               <FormFieldWrapper label="Customer">
                 <Select
@@ -192,18 +181,6 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                 </Select>
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Sale Date" htmlFor="sale_date">
-                <Input id="sale_date" type="date" {...register('sale_date')} />
-              </FormFieldWrapper>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <FormFieldWrapper label="Tax Amount" htmlFor="tax_amount">
-                <Input id="tax_amount" placeholder="0.00" {...register('tax_amount')} />
-              </FormFieldWrapper>
-              <FormFieldWrapper label="Discount Amount" htmlFor="discount_amount">
-                <Input id="discount_amount" placeholder="0.00" {...register('discount_amount')} />
-              </FormFieldWrapper>
               <FormFieldWrapper label="Payment Method" error={errors.payment_method?.message}>
                 <Select
                   value={watch('payment_method')}
@@ -223,81 +200,51 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
               </FormFieldWrapper>
             </div>
 
-            <FormFieldWrapper label="Notes" htmlFor="notes">
-              <Textarea id="notes" placeholder="Optional sale notes" {...register('notes')} />
+            <FormFieldWrapper label="Notes">
+              <Textarea placeholder="Optional note" {...register('notes')} className="min-h-10" />
             </FormFieldWrapper>
           </FormSection>
 
           {!isEditing && (
-            <>
-              <FormSection title="Payment Details">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormFieldWrapper label="Payment Amount" htmlFor="payment_amount">
-                    <Input id="payment_amount" placeholder="0.00" {...register('payment_amount')} />
-                  </FormFieldWrapper>
-                  <FormFieldWrapper label="Transaction Ref" htmlFor="transaction_ref">
-                    <Input id="transaction_ref" placeholder="Reference ID" {...register('transaction_ref')} />
-                  </FormFieldWrapper>
-                </div>
-              </FormSection>
+            <FormSection title="Items" description="Select medicine and quantity. Price is applied automatically.">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">Subtotal preview: {totalsPreview.toFixed(2)}</p>
+                <Button type="button" variant="outline" size="sm" onClick={() => append({ medicine: '', quantity: 1 })}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
+              </div>
 
-              <FormSection title="Sale Items" description="Add medicine line items for this sale.">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Add at least one item.</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => append({ medicine: '', quantity: 1, unit_price: '', batch_number: '' })}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Item
-                  </Button>
-                </div>
+              {fields.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
+                  No items added yet.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {fields.map((field, index) => {
+                    const selectedMedicineId = watch(`items.${index}.medicine`)
+                    const selectedMedicine = safeMedicines.find((medicine) => medicine.id === selectedMedicineId)
+                    const unitPrice = selectedMedicine ? Number(selectedMedicine.selling_price) : 0
+                    const lineQty = Number(watch(`items.${index}.quantity`) || 0)
+                    const lineTotal = unitPrice * lineQty
 
-                {fields.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
-                    No items added yet.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {fields.map((field, index) => (
+                    return (
                       <div key={field.id} className="rounded-lg border border-border/60 p-3">
                         <div className="grid gap-3 md:grid-cols-6">
-                          <FormFieldWrapper label="Medicine" className="md:col-span-2" error={errors.items?.[index]?.medicine?.message}>
+                          <FormFieldWrapper label="Medicine" className="md:col-span-3" error={errors.items?.[index]?.medicine?.message}>
                             <Select
-                              value={watch(`items.${index}.medicine`) || ''}
-                              onValueChange={(value) => {
-                                setValue(`items.${index}.medicine`, value, { shouldValidate: true })
-                                const selected = safeMedicines.find((medicine) => medicine.id === value)
-                                if (selected) {
-                                  setValue(`items.${index}.unit_price`, String(selected.selling_price), { shouldValidate: true })
-                                  setValue(`items.${index}.batch_number`, selected.batch_number, { shouldValidate: true })
-                                }
-                              }}
+                              value={selectedMedicineId || ''}
+                              onValueChange={(value) => setValue(`items.${index}.medicine`, value, { shouldValidate: true })}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select medicine" />
                               </SelectTrigger>
                               <SelectContent>
-                                <div className="p-2">
-                                  <Input
-                                    placeholder="Search medicine"
-                                    value={medicineSearch}
-                                    onChange={(event) => setMedicineSearch(event.target.value)}
-                                  />
-                                </div>
-                                {safeMedicines
-                                  .filter((medicine) =>
-                                    `${medicine.name} ${medicine.batch_number} ${medicine.generic_name ?? ''}`
-                                      .toLowerCase()
-                                      .includes(medicineSearch.toLowerCase()),
-                                  )
-                                  .map((medicine) => (
-                                    <SelectItem key={medicine.id} value={medicine.id}>
-                                      {medicine.name} ({medicine.batch_number})
-                                    </SelectItem>
-                                  ))}
+                                {safeMedicines.map((medicine) => (
+                                  <SelectItem key={medicine.id} value={medicine.id}>
+                                    {medicine.name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </FormFieldWrapper>
@@ -306,20 +253,12 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                             <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Unit Price" error={errors.items?.[index]?.unit_price?.message}>
-                            <Input
-                              placeholder="0.00"
-                              {...register(`items.${index}.unit_price`)}
-                              disabled={!!watch(`items.${index}.medicine`)}
-                            />
+                          <FormFieldWrapper label="Unit Price">
+                            <Input value={unitPrice ? unitPrice.toFixed(2) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Batch" error={errors.items?.[index]?.batch_number?.message}>
-                            <Input
-                              placeholder="Batch"
-                              {...register(`items.${index}.batch_number`)}
-                              disabled={!!watch(`items.${index}.medicine`)}
-                            />
+                          <FormFieldWrapper label="Line Total">
+                            <Input value={lineTotal ? lineTotal.toFixed(2) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
                         </div>
 
@@ -329,11 +268,11 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                           </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </FormSection>
-            </>
+                    )
+                  })}
+                </div>
+              )}
+            </FormSection>
           )}
 
           <FormActions>
@@ -342,7 +281,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Update Sale' : 'Create Sale'}
+              {isEditing ? 'Update Sale' : 'Complete Sale'}
             </Button>
           </FormActions>
         </FormLayout>

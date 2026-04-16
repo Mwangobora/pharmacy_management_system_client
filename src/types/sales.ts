@@ -82,8 +82,8 @@ export interface Sale {
 export interface SaleItemPayload {
   medicine: string
   quantity: number
-  unit_price: string
-  batch_number: string
+  unit_price?: string
+  batch_number?: string
 }
 
 export interface SaleCreatePayload {
