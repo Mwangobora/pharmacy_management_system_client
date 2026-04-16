@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import type { Medicine } from '@/types/inventory'
+import { formatTzsCurrency } from '@/lib/currency'
 
 interface MedicineDetailProps {
   open: boolean
@@ -28,9 +29,9 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
           <div><p className="text-sm text-muted-foreground">Expiry Date</p><p className={medicine.days_to_expiry <= 30 ? 'text-destructive' : ''}>{medicine.expiry_date} ({medicine.days_to_expiry} days)</p></div>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <div><p className="text-sm text-muted-foreground">Purchase Price</p><p>${medicine.purchase_price}</p></div>
-          <div><p className="text-sm text-muted-foreground">Selling Price</p><p>${medicine.selling_price}</p></div>
-          <div><p className="text-sm text-muted-foreground">Profit/Unit</p><p className="text-green-600">${medicine.profit_per_unit}</p></div>
+          <div><p className="text-sm text-muted-foreground">Purchase Price</p><p>{formatTzsCurrency(medicine.purchase_price)}</p></div>
+          <div><p className="text-sm text-muted-foreground">Selling Price</p><p>{formatTzsCurrency(medicine.selling_price)}</p></div>
+          <div><p className="text-sm text-muted-foreground">Profit/Unit</p><p className="text-green-600">{formatTzsCurrency(medicine.profit_per_unit)}</p></div>
         </div>
         <div className="grid grid-cols-4 gap-4">
           <div><p className="text-sm text-muted-foreground">Stock</p><p>{medicine.stock_quantity} {medicine.unit}</p></div>

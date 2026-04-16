@@ -15,6 +15,7 @@ import { PurchaseDetail } from '@/components/purchases/PurchaseDetail'
 import { usePurchases } from '@/hooks/queries/usePurchases'
 import { useDeletePurchase } from '@/hooks/mutations/usePurchases'
 import type { Purchase } from '@/types/suppliers'
+import { formatTzsCurrency } from '@/lib/currency'
 
 export default function PurchasesPage() {
   const [search, setSearch] = useState('')
@@ -52,7 +53,7 @@ export default function PurchasesPage() {
     { key: 'invoice', header: 'Invoice', cell: (item) => <span className="font-medium">{item.invoice_number}</span> },
     { key: 'supplier', header: 'Supplier', cell: (item) => item.supplier_name },
     { key: 'date', header: 'Date', cell: (item) => item.purchase_date },
-    { key: 'amount', header: 'Net Amount', cell: (item) => `$${item.net_amount}` },
+    { key: 'amount', header: 'Net Amount', cell: (item) => formatTzsCurrency(item.net_amount) },
     {
       key: 'status',
       header: 'Status',

@@ -16,6 +16,7 @@ import { useCustomers } from '@/hooks/queries/useCustomers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreateSale, useUpdateSale } from '@/hooks/mutations/useSales'
 import type { PaymentMethod, Sale } from '@/types/sales'
+import { formatTzsCurrency } from '@/lib/currency'
 
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
@@ -208,7 +209,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
           {!isEditing && (
             <FormSection title="Items" description="Select medicine and quantity. Price is applied automatically.">
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Subtotal preview: {totalsPreview.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">Subtotal preview: {formatTzsCurrency(totalsPreview)}</p>
                 <Button type="button" variant="outline" size="sm" onClick={() => append({ medicine: '', quantity: 1 })}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
@@ -254,11 +255,11 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                           </FormFieldWrapper>
 
                           <FormFieldWrapper label="Unit Price">
-                            <Input value={unitPrice ? unitPrice.toFixed(2) : ''} readOnly disabled placeholder="Auto" />
+                            <Input value={unitPrice ? formatTzsCurrency(unitPrice) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
 
                           <FormFieldWrapper label="Line Total">
-                            <Input value={lineTotal ? lineTotal.toFixed(2) : ''} readOnly disabled placeholder="Auto" />
+                            <Input value={lineTotal ? formatTzsCurrency(lineTotal) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
                         </div>
 

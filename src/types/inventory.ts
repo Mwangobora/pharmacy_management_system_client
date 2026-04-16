@@ -99,5 +99,7 @@ export interface DashboardStats {
   low_stock_count: number
   expiring_soon_count: number
   expired_count: number
-  total_value: string
+  total_value?: string
+  total_stock_value?: string
+  currency?: string
 }

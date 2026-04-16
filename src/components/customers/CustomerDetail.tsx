@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCustomerLoyaltySummary, useCustomerPurchaseHistory } from '@/hooks/queries/useCustomers'
 import type { Customer, CustomerLoyaltySummary, Sale } from '@/types/sales'
+import { formatTzsCurrency } from '@/lib/currency'
 
 interface CustomerDetailProps {
   open: boolean
@@ -64,13 +65,13 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Spent</p>
-            <p>${summary?.total_spent ?? customer.total_spent}</p>
+            <p>{formatTzsCurrency(summary?.total_spent ?? customer.total_spent)}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Average Purchase</p>
-            <p>{summary?.average_purchase ? `$${summary.average_purchase}` : '-'}</p>
+            <p>{summary?.average_purchase ? formatTzsCurrency(summary.average_purchase) : '-'}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Last Purchase</p>
@@ -86,7 +87,7 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
               {safeHistory.slice(0, 3).map((sale: Sale) => (
                 <div key={sale.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
                   <span>{sale.invoice_number}</span>
-                  <span className="text-muted-foreground">${sale.net_amount}</span>
+                  <span className="text-muted-foreground">{formatTzsCurrency(sale.net_amount)}</span>
                 </div>
               ))}
             </div>

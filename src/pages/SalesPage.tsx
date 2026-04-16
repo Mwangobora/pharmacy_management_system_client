@@ -15,6 +15,7 @@ import { SaleDetail } from '@/components/sales/SaleDetail'
 import { useSales } from '@/hooks/queries/useSales'
 import { useDeleteSale } from '@/hooks/mutations/useSales'
 import type { Sale } from '@/types/sales'
+import { formatTzsCurrency } from '@/lib/currency'
 
 export default function SalesPage() {
   const [search, setSearch] = useState('')
@@ -52,7 +53,7 @@ export default function SalesPage() {
     { key: 'invoice', header: 'Invoice', cell: (item) => <span className="font-medium">{item.invoice_number}</span> },
     { key: 'customer', header: 'Customer', cell: (item) => item.customer_name || 'Walk-in' },
     { key: 'date', header: 'Date', cell: (item) => item.sale_date },
-    { key: 'amount', header: 'Net Amount', cell: (item) => `$${item.net_amount}` },
+    { key: 'amount', header: 'Net Amount', cell: (item) => formatTzsCurrency(item.net_amount) },
     {
       key: 'status',
       header: 'Status',

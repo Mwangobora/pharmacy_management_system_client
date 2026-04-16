@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import type { Sale } from '@/types/sales'
+import { formatTzsCurrency } from '@/lib/currency'
 
 interface SaleDetailProps {
   open: boolean
@@ -40,29 +41,29 @@ export function SaleDetail({ open, onOpenChange, sale }: SaleDetailProps) {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Total</p>
-            <p>${sale.total_amount}</p>
+            <p>{formatTzsCurrency(sale.total_amount)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Tax</p>
-            <p>${sale.tax_amount}</p>
+            <p>{formatTzsCurrency(sale.tax_amount)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Discount</p>
-            <p>${sale.discount_amount}</p>
+            <p>{formatTzsCurrency(sale.discount_amount)}</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Net Amount</p>
-            <p>${sale.net_amount}</p>
+            <p>{formatTzsCurrency(sale.net_amount)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Paid</p>
-            <p>${sale.total_paid}</p>
+            <p>{formatTzsCurrency(sale.total_paid)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Due</p>
-            <p>${sale.amount_due}</p>
+            <p>{formatTzsCurrency(sale.amount_due)}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

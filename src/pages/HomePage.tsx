@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StatCard } from '@/components/StatCard'
 import { useDashboardStats, useLowStockMedicines, useExpiringSoonMedicines } from '@/hooks/queries/useMedicines'
 import { ROUTES } from '@/routes/paths'
+import { formatTzsCurrency } from '@/lib/currency'
 
 export default function HomePage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
@@ -35,7 +36,7 @@ export default function HomePage() {
             <StatCard title="Total Medicines" value={stats?.total_medicines || 0} icon={Pill} />
             <StatCard title="Low Stock" value={stats?.low_stock_count || 0} icon={AlertTriangle} description="Needs attention" />
             <StatCard title="Expiring Soon" value={stats?.expiring_soon_count || 0} icon={Clock} description="Within 30 days" />
-            <StatCard title="Total Value" value={`$${stats?.total_value || '0'}`} icon={TrendingUp} />
+            <StatCard title="Total Value" value={formatTzsCurrency(stats?.total_stock_value ?? stats?.total_value ?? '0')} icon={TrendingUp} />
           </>
         )}
       </div>

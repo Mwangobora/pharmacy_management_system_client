@@ -123,6 +123,7 @@ export interface CustomerLoyaltySummary {
   total_spent: string
   average_purchase: string
   last_purchase_date: string | null
+  currency?: string
 }
 
 export interface DailySummary {

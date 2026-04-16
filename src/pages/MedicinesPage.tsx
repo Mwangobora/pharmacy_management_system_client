@@ -17,6 +17,7 @@ import { useDeleteMedicine } from '@/hooks/mutations/useMedicines'
 import type { Medicine } from '@/types/inventory'
 import { MedicineForm } from '@/components/medicines/MedicineForm'
 import { MedicineDetail } from '@/components/medicines/MedicineDetail'
+import { formatTzsCurrency } from '@/lib/currency'
 
 export default function MedicinesPage() {
   const [search, setSearch] = useState('')
@@ -54,7 +55,7 @@ export default function MedicinesPage() {
     { key: 'name', header: 'Name', cell: (item) => <div><p className="font-medium">{item.name}</p><p className="text-xs text-muted-foreground">{item.generic_name}</p></div> },
     { key: 'category', header: 'Category', cell: (item) => item.category_name },
     { key: 'stock', header: 'Stock', cell: (item) => <div className="flex items-center gap-2"><span>{item.stock_quantity} {item.unit}</span>{getStockBadge(item)}</div> },
-    { key: 'price', header: 'Price', cell: (item) => `$${item.selling_price}` },
+    { key: 'price', header: 'Price', cell: (item) => formatTzsCurrency(item.selling_price) },
     { key: 'expiry', header: 'Expiry', cell: (item) => <span className={item.days_to_expiry <= 30 ? 'text-destructive' : ''}>{item.expiry_date}</span> },
     { key: 'actions', header: '', className: 'w-[100px]', cell: (item) => (
       <div className="flex items-center gap-1">

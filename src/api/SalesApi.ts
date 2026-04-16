@@ -117,7 +117,7 @@ export class SalesApi {
   }
 
   static async getDailySummary(date?: string, signal?: AbortSignal): Promise<DailySummary> {
-    const params = date ? { date } : {}
+    const params = date ? { date } : undefined
     return httpClient.get<DailySummary>(ENDPOINTS.SALES_DAILY_SUMMARY, params, signal)
   }
 
