@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Edit, Trash2, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PageHeader } from '@/components/PageHeader'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable, type Column } from '@/components/DataTable'
 import { SearchInput } from '@/components/SearchInput'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -82,33 +82,39 @@ export default function SalesPage() {
     },
   ]
 
-  if (isError) return <ErrorState onRetry={refetch} />
-
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Sales"
-        description="Record and manage customer sales"
-        action={
-          <Button onClick={() => { setSelectedSale(null); setFormOpen(true) }}>
-            <Plus className="mr-2 h-4 w-4" /> Add Sale
-          </Button>
-        }
-      />
-
-      <div className="flex items-center gap-4">
-        <div className="w-full max-w-sm">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search sales..." />
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={safeSales}
-        isLoading={isLoading}
-        keyExtractor={(item) => item.id}
-        emptyMessage="No sales found"
-      />
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-base">Sales Records</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Review invoices, inspect payment status, and update sale notes when needed.
+            </p>
+          </div>
+          <div className="flex w-full max-w-md items-center gap-3">
+            <div className="flex-1">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search sales..." />
+            </div>
+            <Button onClick={() => { setSelectedSale(null); setFormOpen(true) }}>
+              Add Sale
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isError ? (
+            <ErrorState onRetry={refetch} />
+          ) : (
+            <DataTable
+              columns={columns}
+              data={safeSales}
+              isLoading={isLoading}
+              keyExtractor={(item) => item.id}
+              emptyMessage="No sales found"
+            />
+          )}
+        </CardContent>
+      </Card>
 
       <SaleForm open={formOpen} onOpenChange={setFormOpen} sale={selectedSale} />
       <SaleDetail open={detailOpen} onOpenChange={setDetailOpen} sale={selectedSale} />

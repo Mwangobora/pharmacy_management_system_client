@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
+  LayoutDashboard,
   Home,
   Users,
   Boxes,
@@ -28,14 +29,16 @@ type NavItem = {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Home', href: ROUTES.HOME, icon: Home, iconClass: 'text-sky-500 dark:text-sky-400' },
+  { name: 'Dashboard', href: ROUTES.DASHBOARD_OVERVIEW, icon: LayoutDashboard, iconClass: 'text-sky-500 dark:text-sky-400' },
+  { name: 'Home', href: ROUTES.HOME, icon: Home, iconClass: 'text-primary dark:text-primary' },
   {
-    name: 'User Management',
-    href: ROUTES.USER_MANAGEMENT,
-    icon: Users,
-    iconClass: 'text-indigo-500 dark:text-indigo-400',
-    anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'view_permission'],
+    name: 'Sales & Billing',
+    href: ROUTES.SALES_BILLING,
+    icon: Receipt,
+    iconClass: 'text-cyan-500 dark:text-cyan-400',
+    anyPermissions: ['view_customer', 'view_sale', 'view_payment'],
   },
+
   {
     name: 'Inventory',
     href: ROUTES.INVENTORY,
@@ -51,11 +54,11 @@ const navigation: NavItem[] = [
     anyPermissions: ['view_supplier', 'view_purchase'],
   },
   {
-    name: 'Sales & Billing',
-    href: ROUTES.SALES_BILLING,
-    icon: Receipt,
-    iconClass: 'text-cyan-500 dark:text-cyan-400',
-    anyPermissions: ['view_customer', 'view_sale', 'view_payment'],
+    name: 'User Management',
+    href: ROUTES.USER_MANAGEMENT,
+    icon: Users,
+    iconClass: 'text-indigo-500 dark:text-indigo-400',
+    anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'view_permission'],
   },
 ]
 

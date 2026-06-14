@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const UsersPage = lazy(() => import('@/pages/UsersPage'))
 const RolesPage = lazy(() => import('@/pages/RolesPage'))
@@ -41,7 +42,8 @@ export function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.DASHBOARD} element={<DashboardLayout />}>
-            <Route index element={<Navigate to={ROUTES.HOME} replace />} />
+            <Route index element={<Navigate to={ROUTES.DASHBOARD_OVERVIEW} replace />} />
+            <Route path="overview" element={<DashboardPage />} />
             <Route path="home" element={<HomePage />} />
             <Route path="profile" element={<ProfilePage />} />
 

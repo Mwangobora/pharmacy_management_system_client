@@ -1,0 +1,440 @@
+The pharmacy management system is already functional. Existing management modules are available through the sidebar, but the system currently lacks a proper main daily-selling interface with a cart.
+
+Create a clean, professional, fast, and enterprise-quality Pharmacy Point of Sale UI where pharmacists and sellers can search medicines, inspect medicine details, add products to a cart, and complete daily sales.
+
+Important Instructions
+First inspect the existing project structure, components, styling system, theme configuration, and design patterns.
+Read the existing primary colour from the project theme or CSS variables and use it consistently.
+Do not introduce a different primary colour.
+Reuse the existing components, typography, spacing, buttons, dialogs, drawers, tables, form elements, notifications, and layout system.
+Do not redesign or break the current sidebar and management modules.
+Do not change working backend business logic or API contracts unnecessarily.
+Connect the UI to the existing APIs, services, types, hooks, and state management.
+Do not use mock data when real API endpoints already exist.
+The final UI must look intentionally designed, not like a collection of automatically generated cards.
+Main Selling Page
+
+Create a dedicated page for daily medicine sales.
+
+The page should be the primary working area for:
+
+Pharmacists
+Pharmacy sellers
+Cashiers
+Authorized dispensing staff
+
+The layout should contain two main areas:
+
+Medicine search and product results
+Current sale cart and checkout summary
+
+On desktop, show both sections at the same time.
+
+Suggested layout:
+
+Left section: approximately 60–65%
+Right cart section: approximately 35–40%
+
+The cart should remain visible while the user searches for more medicines.
+
+Top Section
+
+Create a clean page header containing:
+
+Page title: Pharmacy Sales
+Small supporting text such as: Search medicines, add items and complete a sale
+Current user or seller name where already available
+Current date or shift information where supported
+Optional compact button for viewing recent sales
+
+Avoid using a large dashboard-style header.
+
+Medicine Search
+
+Place a large, prominent search field at the top of the selling interface.
+
+The user must be able to search using:
+
+Brand name
+Generic name
+Medicine name
+Active ingredient
+Barcode
+SKU
+Product code
+Category
+Strength
+Dosage form
+
+Use a placeholder similar to:
+
+Search by medicine name, generic name, barcode, SKU or active ingredient...
+
+Search should:
+
+Begin as the user types
+Use a small debounce
+Support keyboard navigation
+Allow Enter to select a highlighted medicine
+Display loading feedback
+Display a clear empty state
+Display errors using the existing feedback component
+Avoid making a request for every individual keystroke without debounce
+Support barcode scanner input where possible
+Search Results
+
+Display search results in a clean, information-rich format.
+
+Each result should show:
+
+Brand or medicine name
+Generic name
+Strength
+Dosage form
+Selling price
+Available stock
+Selling unit
+Prescription status
+Batch availability
+Nearest expiry date
+Manufacturer, if available
+
+Example:
+
+Amoxil
+Amoxicillin · 500 mg · Capsule
+TZS 8,000 per box
+Stock: 24 boxes · Nearest expiry: March 2027
+
+Use compact badges for:
+
+In stock
+Low stock
+Out of stock
+Prescription required
+Expiring soon
+Controlled medicine, where applicable
+
+Do not use excessive colours. Use the system primary colour for primary actions and neutral colours for most information.
+
+Medicine Details
+
+When the user clicks a medicine, open a polished reusable details drawer or side panel.
+
+Show available information such as:
+
+Brand name
+Generic name
+Active ingredient
+Strength
+Dosage form
+Category
+Manufacturer
+Selling price
+Cost price only for authorized roles
+Available stock
+Selling units
+Batch numbers
+Expiry dates
+Prescription requirement
+Storage instructions
+Medicine description
+Usage information, if stored
+Contraindications or warnings, if stored
+
+The drawer should contain a clear Add to Cart action.
+
+For medicines with multiple batches or selling units, let the user select the appropriate unit while keeping FEFO as the default batch-selection strategy.
+
+Add-to-Cart Flow
+
+When adding a medicine, allow the user to choose:
+
+Quantity
+Selling unit
+Batch, only when manual selection is permitted
+Unit price, only when editable by an authorized user
+Discount, only when permitted
+Prescription reference, when required
+
+The system should automatically:
+
+Select the batch with the earliest valid expiry date
+Exclude expired batches
+Prevent quantity above available stock
+Warn when stock is low
+Respect existing pricing and inventory logic
+Preserve existing FEFO or FIFO backend behaviour
+
+For simple products, one click should add the medicine directly to the cart.
+
+Do not force the user through a large modal for every medicine.
+
+Cart Panel
+
+Create a clean cart panel on the right side.
+
+The cart header should show:
+
+Current Sale
+Number of cart items
+Clear cart action
+Optional held-sale action where already supported
+
+Each cart item should show:
+
+Medicine name
+Generic name or strength
+Dosage form
+Batch
+Selling unit
+Unit price
+Quantity controls
+Subtotal
+Remove action
+
+Quantity controls should support:
+
+Increase
+Decrease
+Direct quantity entry
+Keyboard input
+
+Do not use tiny controls.
+
+Keep item rows compact but readable.
+
+Cart Calculations
+
+Display a clear summary containing:
+
+Subtotal
+Discount
+Tax or VAT, where applicable
+Additional charges, where applicable
+Amount paid
+Balance
+Grand total
+
+The grand total should be visually prominent.
+
+Use proper money formatting, for example:
+
+TZS 25,000
+
+Do not hard-code currency if the system already has a currency configuration.
+
+Customer or Patient Section
+
+Provide a compact customer section inside the cart.
+
+Allow the seller to:
+
+Continue as a walk-in customer
+Search an existing customer or patient
+Add a new customer where supported
+View basic customer information
+Record patient age or necessary information when required
+Record known allergies where supported
+
+Do not make customer information mandatory for normal over-the-counter sales unless existing business rules require it.
+
+Prescription Handling
+
+For prescription-only medicines:
+
+Show a clear prescription-required indicator
+Request prescription information only when necessary
+Allow prescription number entry
+Allow prescriber information where supported
+Allow prescription attachment where the backend supports it
+Require pharmacist approval where the existing permissions demand it
+Prevent unauthorized users from bypassing the restriction
+
+Do not show prescription fields for ordinary products.
+
+Checkout
+
+Create one strong primary action:
+
+Proceed to Payment
+
+The action should be disabled when:
+
+The cart is empty
+Stock validation fails
+A required prescription is missing
+Required customer information is incomplete
+Another business rule prevents checkout
+
+The payment interface should support the methods already available in the system, such as:
+
+Cash
+Mobile money
+Card
+Insurance
+Credit account
+Split payment
+
+Do not create unsupported payment methods.
+
+For cash payment, show:
+
+Total payable
+Amount received
+Change due
+
+After successful payment, display a clean success state containing:
+
+Sale number
+Amount paid
+Payment method
+Change
+Print receipt
+Print dispensing label, where supported
+Start new sale
+View sale details
+Daily Seller Workflow
+
+Optimize the UI for this workflow:
+
+Search medicine
+Review essential details
+Add medicine to cart
+Adjust quantity
+Add customer only when needed
+Verify prescription where necessary
+Proceed to payment
+Complete sale
+Print receipt
+Immediately start another sale
+
+The seller should not need to navigate between many pages.
+
+Keyboard and Scanner Support
+
+Add practical keyboard behaviour:
+
+Focus medicine search automatically when the page opens
+/ or another suitable shortcut focuses search
+Arrow keys navigate search results
+Enter adds or opens the selected medicine
+Escape closes drawers and dialogs
+Barcode scanner input should search and add a matching medicine
+Provide a shortcut for proceeding to payment where appropriate
+
+Do not interfere with normal text-entry behaviour.
+
+States to Design
+
+Create proper UI states for:
+
+Initial empty selling screen
+Searching
+Search results
+No matching medicines
+API error
+Medicine out of stock
+Low stock
+Expired medicine
+Prescription required
+Empty cart
+Populated cart
+Payment processing
+Payment success
+Payment failure
+
+Every state should be clear and polished.
+
+Responsive Behaviour
+
+Design desktop-first because the pharmacy seller needs search results and the cart visible together.
+
+For tablets:
+
+Keep the layout usable
+Allow the cart to become a drawer where necessary
+
+For small screens:
+
+Show medicine search first
+Provide a clearly visible cart button with item count
+Open the cart in a full-height drawer or sheet
+
+Do not remove important medicine or stock information on smaller screens.
+
+Visual Design Requirements
+
+The UI should be:
+
+Clean
+Professional
+Fast to scan
+Compact but not crowded
+Suitable for long daily use
+Consistent with the current system
+Accessible
+Enterprise-grade
+
+Avoid:
+
+Excessive gradients
+Random bright colours
+Oversized cards
+Large decorative empty spaces
+Too many icons
+Icons without labels for important actions
+Excessive animations
+Vibe-coded layouts
+Repeated nested cards
+Unnecessary dashboard charts on the selling screen
+
+Use:
+
+Existing system primary colour
+Neutral backgrounds
+Clear borders
+Consistent spacing
+Strong typography hierarchy
+Subtle hover and focus states
+Visible keyboard focus
+Proper contrast
+Reusable Components
+
+Create or improve reusable components where appropriate, such as:
+
+MedicineSearch
+MedicineSearchResult
+MedicineDetailsDrawer
+MedicineStockBadge
+PrescriptionBadge
+SaleCart
+SaleCartItem
+QuantityControl
+CustomerSelector
+PrescriptionVerification
+SaleSummary
+PaymentDialog
+SaleSuccessDialog
+
+Keep components maintainable and consistent with the existing project architecture.
+
+Final Requirement
+
+Before writing code, inspect the existing project and identify:
+
+Existing theme and primary colour
+Existing sales APIs
+Medicine search APIs
+Inventory and batch APIs
+Customer APIs
+Payment APIs
+Existing reusable components
+Existing permission rules
+Existing notification components
+Existing currency formatting
+Existing state management patterns
+
+Then implement the main pharmacy selling interface using those existing structures.
+
+Do not only generate static UI. The page must be integrated with the currently working system and must preserve existing medicine, stock, pricing, batch, prescription, payment, and permission rules.
