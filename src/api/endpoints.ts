@@ -6,8 +6,9 @@ export const ENDPOINTS = {
   AUTH_REFRESH: '/api/auth/jwt/refresh/',
   AUTH_VERIFY: '/api/auth/jwt/verify/',
   AUTH_LOGOUT: '/api/auth/logout/',
-  AUTH_ME: '/api/auth/users/me/',
+  AUTH_ME: '/api/auth/me/',
   AUTH_SET_PASSWORD: '/api/auth/users/set_password/',
+  AUTH_SYNC_ACCESS: '/api/auth/sync/',
 
   // Users
   USERS: '/api/users/',

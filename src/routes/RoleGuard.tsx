@@ -3,7 +3,6 @@ import { useAuthStore } from '@/store/authStore'
 import { ROUTES } from './paths'
 
 interface RoleGuardProps {
-  allowedRoles?: string[]
   requiredPermission?: string
   requiredPermissions?: string[]
   requireAllPermissions?: boolean
@@ -18,26 +17,20 @@ interface RoleGuardProps {
  * @param requireAllPermissions - If true, user must have ALL permissions in requiredPermissions
  */
 export function RoleGuard({
-  allowedRoles,
   requiredPermission,
   requiredPermissions,
   requireAllPermissions = false,
 }: RoleGuardProps) {
   const { user, hasPermission, hasAnyPermission, hasAllPermissions } = useAuthStore()
 
-  // Check role-based access
-  if (allowedRoles && allowedRoles.length > 0) {
-    if (!user?.role_name || !allowedRoles.includes(user.role_name)) {
-      return <Navigate to={ROUTES.ACCESS_DENIED} replace />
-    }
+  if (!user?.is_active) {
+    return <Navigate to={ROUTES.ACCESS_DENIED} replace />
   }
 
-  // Check single permission
   if (requiredPermission && !hasPermission(requiredPermission)) {
     return <Navigate to={ROUTES.ACCESS_DENIED} replace />
   }
 
-  // Check multiple permissions
   if (requiredPermissions && requiredPermissions.length > 0) {
     const hasAccess = requireAllPermissions
       ? hasAllPermissions(requiredPermissions)

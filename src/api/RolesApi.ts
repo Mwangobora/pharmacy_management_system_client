@@ -4,12 +4,16 @@ import { ENDPOINTS } from './endpoints'
 
 export interface RoleCreatePayload {
   name: string
+  code?: string
+  description?: string
   permissions: number[]
   is_active?: boolean
 }
 
 export interface RoleUpdatePayload {
   name?: string
+  code?: string
+  description?: string
   permissions?: number[]
   is_active?: boolean
 }

@@ -24,17 +24,21 @@ export function PermissionDetail({ open, onOpenChange, permission }: PermissionD
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">App</p>
-            <Badge variant="outline">{permission.content_type_label}</Badge>
+            <p className="text-sm text-muted-foreground">Module</p>
+            <Badge variant="outline">{permission.module || '-'}</Badge>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Model</p>
-            <Badge variant="secondary">{permission.content_type_model}</Badge>
+            <p className="text-sm text-muted-foreground">Resource</p>
+            <Badge variant="secondary">{permission.resource || '-'}</Badge>
           </div>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Content Type ID</p>
-          <p>{permission.content_type}</p>
+          <p className="text-sm text-muted-foreground">Action</p>
+          <p>{permission.action || '-'}</p>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Description</p>
+          <p>{permission.description || '-'}</p>
         </div>
       </div>
     </ResponsiveModal>

@@ -50,7 +50,7 @@ export function AppRoutes() {
             <Route
               path="user-management"
               element={
-                <RoleGuard requiredPermissions={['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'view_permission']} />
+                <RoleGuard requiredPermissions={['access.user.view', 'access.role.view', 'access.permission.view']} />
               }
             >
               <Route element={<UserManagementPage />}>
@@ -64,7 +64,7 @@ export function AppRoutes() {
 
             <Route
               path="inventory"
-              element={<RoleGuard requiredPermissions={['view_category', 'view_medicine', 'view_stocktransaction']} />}
+              element={<RoleGuard requiredPermissions={['inventory.category.view', 'inventory.medicine.view', 'inventory.stock_transaction.view']} />}
             >
               <Route element={<InventoryManagementPage />}>
                 <Route index element={<Navigate to="categories" replace />} />
@@ -76,7 +76,7 @@ export function AppRoutes() {
 
             <Route
               path="procurement"
-              element={<RoleGuard requiredPermissions={['view_supplier', 'view_purchase']} />}
+              element={<RoleGuard requiredPermissions={['procurement.supplier.view', 'procurement.purchase.view']} />}
             >
               <Route element={<ProcurementPage />}>
                 <Route index element={<Navigate to="suppliers" replace />} />
@@ -88,7 +88,7 @@ export function AppRoutes() {
 
             <Route
               path="sales-billing"
-              element={<RoleGuard requiredPermissions={['view_customer', 'view_sale', 'view_payment']} />}
+              element={<RoleGuard requiredPermissions={['customers.customer.view', 'sales.sale.view', 'sales.payment.view']} />}
             >
               <Route element={<SalesBillingPage />}>
                 <Route index element={<Navigate to="customers" replace />} />

@@ -36,7 +36,7 @@ const navigation: NavItem[] = [
     href: ROUTES.SALES_BILLING,
     icon: Receipt,
     iconClass: 'text-cyan-500 dark:text-cyan-400',
-    anyPermissions: ['view_customer', 'view_sale', 'view_payment'],
+    anyPermissions: ['customers.customer.view', 'sales.sale.view', 'sales.payment.view'],
   },
 
   {
@@ -44,21 +44,21 @@ const navigation: NavItem[] = [
     href: ROUTES.INVENTORY,
     icon: Boxes,
     iconClass: 'text-emerald-500 dark:text-emerald-400',
-    anyPermissions: ['view_category', 'view_medicine', 'view_stocktransaction'],
+    anyPermissions: ['inventory.category.view', 'inventory.medicine.view', 'inventory.stock_transaction.view'],
   },
   {
     name: 'Procurement',
     href: ROUTES.PROCUREMENT,
     icon: Truck,
     iconClass: 'text-orange-500 dark:text-orange-400',
-    anyPermissions: ['view_supplier', 'view_purchase'],
+    anyPermissions: ['procurement.supplier.view', 'procurement.purchase.view'],
   },
   {
     name: 'User Management',
     href: ROUTES.USER_MANAGEMENT,
     icon: Users,
     iconClass: 'text-indigo-500 dark:text-indigo-400',
-    anyPermissions: ['view_user', 'add_user', 'change_user', 'delete_user', 'view_role', 'view_permission'],
+    anyPermissions: ['access.user.view', 'access.role.view', 'access.permission.view'],
   },
 ]
 

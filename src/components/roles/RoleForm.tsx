@@ -18,6 +18,8 @@ import type { RoleDetail } from '@/types/auth'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Role name is required'),
+  code: z.string().trim().min(1, 'Role code is required'),
+  description: z.string().optional(),
   permissions: z.array(z.number()).default([]),
   is_active: z.boolean().default(true),
 })
@@ -50,6 +52,8 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
     reValidateMode: 'onChange',
     defaultValues: {
       name: '',
+      code: '',
+      description: '',
       permissions: [],
       is_active: true,
     },
@@ -59,13 +63,15 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
     if (role) {
       reset({
         name: role.name,
+        code: role.code,
+        description: role.description || '',
         permissions: role.permissions || [],
         is_active: role.is_active,
       })
       return
     }
 
-    reset({ name: '', permissions: [], is_active: true })
+    reset({ name: '', code: '', description: '', permissions: [], is_active: true })
   }, [role, reset])
 
   const selectedPermissions = watch('permissions') || []
@@ -106,6 +112,12 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
           <FormSection title="Role Profile">
             <FormFieldWrapper label="Role Name" htmlFor="name" error={errors.name?.message}>
               <Input id="name" placeholder="Pharmacist" {...register('name')} />
+            </FormFieldWrapper>
+            <FormFieldWrapper label="Role Code" htmlFor="code" error={errors.code?.message}>
+              <Input id="code" placeholder="pharmacist" {...register('code')} />
+            </FormFieldWrapper>
+            <FormFieldWrapper label="Description" htmlFor="description">
+              <Input id="description" placeholder="Describe the purpose of this role" {...register('description')} />
             </FormFieldWrapper>
 
             <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import type { RoleDetail as RoleDetailType } from '@/types/auth'
@@ -6,9 +7,10 @@ interface RoleDetailProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   role?: RoleDetailType | null
+  onEdit?: (role: RoleDetailType) => void
 }
 
-export function RoleDetail({ open, onOpenChange, role }: RoleDetailProps) {
+export function RoleDetail({ open, onOpenChange, role, onEdit }: RoleDetailProps) {
   if (!role) return null
 
   return (
@@ -18,6 +20,16 @@ export function RoleDetail({ open, onOpenChange, role }: RoleDetailProps) {
           <div>
             <p className="text-sm text-muted-foreground">Name</p>
             <p className="font-medium">{role.name}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Code</p>
+            <p>{role.code}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Description</p>
+            <p>{role.description || '-'}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Status</p>
@@ -40,6 +52,19 @@ export function RoleDetail({ open, onOpenChange, role }: RoleDetailProps) {
             )}
           </div>
         </div>
+        {onEdit && (
+          <div className="flex justify-end border-t border-border/60 pt-4">
+            <Button
+              type="button"
+              onClick={() => {
+                onOpenChange(false)
+                onEdit(role)
+              }}
+            >
+              Edit Role
+            </Button>
+          </div>
+        )}
       </div>
     </ResponsiveModal>
   )

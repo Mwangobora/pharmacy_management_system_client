@@ -103,16 +103,20 @@ export default function ProfilePage() {
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Role</p>
-              <p className="font-medium">{profile?.role_name || 'No role'}</p>
+              <p className="text-sm text-muted-foreground">Roles</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {profile?.roles_detail?.length ? profile.roles_detail.map((role) => (
+                  <Badge key={role.id} variant="outline">{role.name}</Badge>
+                )) : <p className="font-medium">No role</p>}
+              </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Permissions</p>
-              {profile?.role_detail?.permissions_detail?.length ? (
+              {profile?.permissions?.length ? (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {profile.role_detail.permissions_detail.map((permission) => (
-                    <Badge key={permission.id} variant="outline">
-                      {permission.codename}
+                  {profile.permissions.map((permission) => (
+                    <Badge key={permission} variant="outline">
+                      {permission}
                     </Badge>
                   ))}
                 </div>

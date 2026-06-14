@@ -27,8 +27,12 @@ export function UserDetail({ open, onOpenChange, user }: UserDetailProps) {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Role</p>
-            <p>{user.role_name || '-'}</p>
+            <p className="text-sm text-muted-foreground">Roles</p>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {user.roles_detail?.length ? user.roles_detail.map((role) => (
+                <Badge key={role.id} variant="outline">{role.name}</Badge>
+              )) : <span>-</span>}
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Status</p>
@@ -45,6 +49,14 @@ export function UserDetail({ open, onOpenChange, user }: UserDetailProps) {
           <div>
             <p className="text-sm text-muted-foreground">Created</p>
             <p>{format(new Date(user.created_at), 'PPP')}</p>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Effective Permissions</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {user.permissions?.length ? user.permissions.map((permission) => (
+              <Badge key={permission} variant="outline">{permission}</Badge>
+            )) : <span className="text-sm text-muted-foreground">No permissions assigned</span>}
           </div>
         </div>
       </div>

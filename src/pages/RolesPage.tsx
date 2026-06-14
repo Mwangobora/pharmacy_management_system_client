@@ -10,6 +10,7 @@ import { DataTable, type Column } from '@/components/DataTable'
 import { SearchInput } from '@/components/SearchInput'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { ErrorState } from '@/components/ErrorState'
+import { PermissionGuard } from '@/components/PermissionGuard'
 import { RoleForm } from '@/components/roles/RoleForm'
 import { RoleDetail } from '@/components/roles/RoleDetail'
 import { useRoles } from '@/hooks/queries/useRoles'
@@ -69,9 +70,9 @@ export default function RolesPage() {
       className: 'w-[100px]',
       cell: (item) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => handleView(item)}><Eye className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4" /></Button>
+          <PermissionGuard permission="access.role.view"><Button variant="ghost" size="icon" onClick={() => handleView(item)}><Eye className="h-4 w-4" /></Button></PermissionGuard>
+          <PermissionGuard permission="access.role.update"><Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="h-4 w-4" /></Button></PermissionGuard>
+          <PermissionGuard permission="access.role.delete"><Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}><Trash2 className="h-4 w-4" /></Button></PermissionGuard>
         </div>
       ),
     },
@@ -85,9 +86,11 @@ export default function RolesPage() {
         title="Roles"
         description="Define access roles for staff"
         action={
-          <Button onClick={() => { setSelectedRole(null); setFormOpen(true) }}>
-            <Plus className="mr-2 h-4 w-4" /> Add Role
-          </Button>
+          <PermissionGuard permission="access.role.create">
+            <Button onClick={() => { setSelectedRole(null); setFormOpen(true) }}>
+              <Plus className="mr-2 h-4 w-4" /> Add Role
+            </Button>
+          </PermissionGuard>
         }
       />
 
@@ -106,7 +109,15 @@ export default function RolesPage() {
       />
 
       <RoleForm open={formOpen} onOpenChange={setFormOpen} role={selectedRole} />
-      <RoleDetail open={detailOpen} onOpenChange={setDetailOpen} role={selectedRole} />
+      <RoleDetail
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        role={selectedRole}
+        onEdit={(role) => {
+          setSelectedRole(role)
+          setFormOpen(true)
+        }}
+      />
       <ConfirmDialog
         open={deleteId !== null}
         onOpenChange={() => setDeleteId(null)}

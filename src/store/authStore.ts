@@ -61,28 +61,20 @@ export const useAuthStore = create<AuthState>()(
 
       hasPermission: (permission) => {
         const { permissions, user } = get()
-        // Admin users have all permissions
-        if (user?.role_name?.toLowerCase() === 'admin' || user?.is_staff) {
-          return true
-        }
+        if (user?.is_active === false) return false
+        if (user?.is_staff && user?.permissions?.includes('*')) return true
         return permissions.includes(permission)
       },
 
       hasAnyPermission: (requiredPermissions) => {
         const { permissions, user } = get()
-        // Admin users have all permissions
-        if (user?.role_name?.toLowerCase() === 'admin' || user?.is_staff) {
-          return true
-        }
+        if (user?.is_active === false) return false
         return requiredPermissions.some(p => permissions.includes(p))
       },
 
       hasAllPermissions: (requiredPermissions) => {
         const { permissions, user } = get()
-        // Admin users have all permissions
-        if (user?.role_name?.toLowerCase() === 'admin' || user?.is_staff) {
-          return true
-        }
+        if (user?.is_active === false) return false
         return requiredPermissions.every(p => permissions.includes(p))
       },
     }),
