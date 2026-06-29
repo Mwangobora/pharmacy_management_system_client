@@ -74,10 +74,17 @@ export function MedicineResultsCard({
               const expired = isMedicineExpired(medicine)
 
               return (
-                <button
+                <div
                   key={medicine.id}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onOpenDetails(medicine)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      onOpenDetails(medicine)
+                    }
+                  }}
                   className={cn(
                     'w-full rounded-xl border border-border/60 bg-card p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md',
                     index === highlightedIndex && 'border-primary/50 ring-2 ring-primary/15',
@@ -107,21 +114,32 @@ export function MedicineResultsCard({
                         <p className="text-xs text-muted-foreground">per {medicine.unit}</p>
                       </div>
                       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                        <Button type="button" variant="outline" size="sm" onClick={() => onOpenDetails(medicine)}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            onOpenDetails(medicine)
+                          }}
+                        >
                           Details
                         </Button>
                         <Button
                           type="button"
                           size="sm"
                           disabled={outOfStock || expired}
-                          onClick={() => onAddToCart(medicine)}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            onAddToCart(medicine)
+                          }}
                         >
                           Add to Cart
                         </Button>
                       </div>
                     </div>
                   </div>
-                </button>
+                </div>
               )
             })}
           </div>
