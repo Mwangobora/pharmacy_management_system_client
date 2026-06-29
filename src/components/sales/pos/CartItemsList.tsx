@@ -4,13 +4,12 @@ import { Minus, Pill, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatTzsCurrency } from '@/lib/currency'
-import type { Medicine } from '@/types/inventory'
 import type { PosCartLine } from './types'
 
 interface CartItemsListProps {
   items: PosCartLine[]
-  onRemove: (medicineId: string) => void
-  onUpdateQuantity: (medicine: Medicine, quantity: number) => void
+  onRemove: (lineId: string) => void
+  onUpdateQuantity: (item: PosCartLine, quantity: number) => void
 }
 
 export function CartItemsList({ items, onRemove, onUpdateQuantity }: CartItemsListProps) {
@@ -29,37 +28,39 @@ export function CartItemsList({ items, onRemove, onUpdateQuantity }: CartItemsLi
   return (
     <div className="space-y-3">
       {items.map((item) => (
-        <div key={item.medicine.id} className="rounded-xl border border-border/60 p-3">
+        <div key={item.lineId} className="rounded-xl border border-border/60 p-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{item.medicine.name}</p>
               <p className="text-xs text-muted-foreground">
-                {[item.medicine.generic_name, item.medicine.unit].filter(Boolean).join(' · ')}
+                {[item.medicine.generic_name, item.unitName].filter(Boolean).join(' · ')}
               </p>
               <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span>Batch: {item.medicine.batch_number || 'N/A'}</span>
-                <span>{formatTzsCurrency(item.medicine.selling_price)} each</span>
+                <span>{formatTzsCurrency(item.unitPrice)} per {item.unitName}</span>
+                <span>1 {item.unitName} = {item.factorToBaseUnit} {item.medicine.base_unit}</span>
+                <span>Available: {Math.floor(item.medicine.stock_quantity / item.factorToBaseUnit)} {item.unitName}</span>
               </div>
             </div>
-            <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(item.medicine.id)}>
+            <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(item.lineId)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="icon" onClick={() => onUpdateQuantity(item.medicine, item.quantity - 1)}>
+              <Button type="button" variant="outline" size="icon" onClick={() => onUpdateQuantity(item, item.quantity - 1)}>
                 <Minus className="h-4 w-4" />
               </Button>
               <Input
                 type="number"
                 min={1}
-                max={item.medicine.stock_quantity}
+                max={Math.max(Math.floor(item.medicine.stock_quantity / item.factorToBaseUnit), 1)}
                 value={item.quantity}
-                onChange={(event) => onUpdateQuantity(item.medicine, Number(event.target.value || 0))}
+                onChange={(event) => onUpdateQuantity(item, Number(event.target.value || 0))}
                 className="h-10 w-20 text-center"
               />
-              <Button type="button" variant="outline" size="icon" onClick={() => onUpdateQuantity(item.medicine, item.quantity + 1)}>
+              <Button type="button" variant="outline" size="icon" onClick={() => onUpdateQuantity(item, item.quantity + 1)}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>

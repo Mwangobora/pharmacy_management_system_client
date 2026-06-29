@@ -16,14 +16,16 @@ import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreatePurchase, useUpdatePurchase } from '@/hooks/mutations/usePurchases'
 import type { Purchase } from '@/types/suppliers'
+import { getPurchaseUnits, getUnitConversion, getUnitPriceFromBase } from '@/components/sales/pos/utils'
 
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   unit_price: z.string().min(1, 'Unit cost is required'),
-  batch_number: z.string().optional(),
-  expiry_date: z.string().optional(),
-  manufacture_date: z.string().optional(),
+  unit_name: z.string().min(1, 'Purchase unit is required'),
+  batch_number: z.string().min(1, 'Batch number is required'),
+  expiry_date: z.string().min(1, 'Expiry date is required'),
+  manufacture_date: z.string().min(1, 'Manufacture date is required'),
 })
 
 const schema = z.object({
@@ -126,6 +128,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
             medicine: item.medicine,
             quantity: item.quantity,
             unit_price: item.unit_price,
+            unit_name: item.unit_name || undefined,
             batch_number: item.batch_number || undefined,
             expiry_date: item.expiry_date || undefined,
             manufacture_date: item.manufacture_date || undefined,
@@ -192,13 +195,13 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
           {!isEditing && (
             <FormSection title="Items" description="Add quantity and unit cost for each medicine.">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-muted-foreground">Stock and cost are updated automatically after saving.</p>
+                <p className="text-xs text-muted-foreground">Enter the purchased unit, lot details, and unit cost. The form shows the resulting base-unit quantity before submission.</p>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="w-full sm:w-auto"
-                  onClick={() => append({ medicine: '', quantity: 1, unit_price: '', batch_number: '', expiry_date: '', manufacture_date: '' })}
+                  onClick={() => append({ medicine: '', quantity: 1, unit_price: '', unit_name: '', batch_number: '', expiry_date: '', manufacture_date: '' })}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
@@ -213,7 +216,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                 <div className="space-y-3">
                   {fields.map((field, index) => (
                     <div key={field.id} className="rounded-lg border border-border/60 p-3">
-                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
                         <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message}>
                           <Select
                             value={watch(`items.${index}.medicine`) || ''}
@@ -221,10 +224,13 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                               setValue(`items.${index}.medicine`, value, { shouldValidate: true })
                               const selected = safeMedicines.find((medicine) => medicine.id === value)
                               if (selected) {
-                                setValue(`items.${index}.unit_price`, String(selected.purchase_price), { shouldValidate: true })
-                                setValue(`items.${index}.batch_number`, selected.batch_number || '', { shouldValidate: true })
-                                setValue(`items.${index}.expiry_date`, selected.expiry_date || '', { shouldValidate: true })
-                                setValue(`items.${index}.manufacture_date`, selected.manufacture_date || '', { shouldValidate: true })
+                                const defaultUnit = getPurchaseUnits(selected)[0]?.unit_name ?? selected.base_unit ?? selected.unit
+                                const conversion = getUnitConversion(selected, defaultUnit)
+                                setValue(`items.${index}.unit_name`, defaultUnit, { shouldValidate: true })
+                                setValue(`items.${index}.unit_price`, selected.purchase_price ? String(getUnitPriceFromBase(selected.purchase_price, conversion.factor_to_base_unit)) : '', { shouldValidate: true })
+                                setValue(`items.${index}.batch_number`, '', { shouldValidate: true })
+                                setValue(`items.${index}.expiry_date`, '', { shouldValidate: true })
+                                setValue(`items.${index}.manufacture_date`, '', { shouldValidate: true })
                               }
                             }}
                           >
@@ -241,6 +247,32 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                           </Select>
                         </FormFieldWrapper>
 
+                        <FormFieldWrapper label="Unit">
+                          <Select
+                            value={watch(`items.${index}.unit_name`) || ''}
+                            onValueChange={(value) => {
+                              setValue(`items.${index}.unit_name`, value, { shouldValidate: true })
+                              const selected = safeMedicines.find((medicine) => medicine.id === watch(`items.${index}.medicine`))
+                              if (selected) {
+                                const conversion = getUnitConversion(selected, value)
+                                setValue(`items.${index}.unit_price`, selected.purchase_price ? String(getUnitPriceFromBase(selected.purchase_price, conversion.factor_to_base_unit)) : '', { shouldValidate: true })
+                              }
+                            }}
+                            disabled={!watch(`items.${index}.medicine`)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(safeMedicines.find((medicine) => medicine.id === watch(`items.${index}.medicine`)) ? getPurchaseUnits(safeMedicines.find((medicine) => medicine.id === watch(`items.${index}.medicine`))!) : []).map((unit) => (
+                                <SelectItem key={unit.id} value={unit.unit_name}>
+                                  {unit.unit_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormFieldWrapper>
+
                         <FormFieldWrapper label="Qty" error={errors.items?.[index]?.quantity?.message}>
                           <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
                         </FormFieldWrapper>
@@ -249,13 +281,42 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                           <Input placeholder="0.00" {...register(`items.${index}.unit_price`)} />
                         </FormFieldWrapper>
 
-                        <FormFieldWrapper label="Batch">
-                          <Input placeholder="Optional" {...register(`items.${index}.batch_number`)} />
+                        <FormFieldWrapper label="Batch" error={errors.items?.[index]?.batch_number?.message}>
+                          <Input placeholder="Required batch number" {...register(`items.${index}.batch_number`)} />
                         </FormFieldWrapper>
 
-                        <FormFieldWrapper label="Expiry" className="sm:col-span-2 xl:col-span-1">
+                        <FormFieldWrapper label="Expiry" className="sm:col-span-2 xl:col-span-1" error={errors.items?.[index]?.expiry_date?.message}>
                           <Input type="date" {...register(`items.${index}.expiry_date`)} />
                         </FormFieldWrapper>
+                      </div>
+
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                        <FormFieldWrapper label="Manufacture Date" error={errors.items?.[index]?.manufacture_date?.message}>
+                          <Input type="date" {...register(`items.${index}.manufacture_date`)} />
+                        </FormFieldWrapper>
+                        <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-sm">
+                          {(() => {
+                            const selectedMedicine = safeMedicines.find((medicine) => medicine.id === watch(`items.${index}.medicine`))
+                            const selectedUnitName = watch(`items.${index}.unit_name`)
+                            if (!selectedMedicine || !selectedUnitName) {
+                              return 'Select a medicine and purchase unit to see the conversion preview.'
+                            }
+                            const conversion = getUnitConversion(selectedMedicine, selectedUnitName)
+                            return `1 ${selectedUnitName} = ${conversion.factor_to_base_unit} ${selectedMedicine.base_unit}`
+                          })()}
+                        </div>
+                        <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-sm">
+                          {(() => {
+                            const selectedMedicine = safeMedicines.find((medicine) => medicine.id === watch(`items.${index}.medicine`))
+                            const selectedUnitName = watch(`items.${index}.unit_name`)
+                            const quantity = Number(watch(`items.${index}.quantity`) || 0)
+                            if (!selectedMedicine || !selectedUnitName) {
+                              return 'Base-unit total appears here before receiving.'
+                            }
+                            const conversion = getUnitConversion(selectedMedicine, selectedUnitName)
+                            return `${quantity} ${selectedUnitName} = ${quantity * conversion.factor_to_base_unit} ${selectedMedicine.base_unit}`
+                          })()}
+                        </div>
                       </div>
 
                       <div className="mt-2 flex justify-end">

@@ -27,16 +27,18 @@ export interface Medicine {
   category_name: string
   supplier: string
   supplier_name: string
-  batch_number: string
-  manufacture_date: string
-  expiry_date: string
-  purchase_price: string
+  batch_number: string | null
+  manufacture_date: string | null
+  expiry_date: string | null
+  purchase_price: string | null
   selling_price: string
   markup_percentage: string | null
   stock_quantity: number
   min_stock_level: number
   max_stock_level: number
   unit: MedicineUnit
+  base_unit: MedicineUnit
+  unit_review_required: boolean
   storage_location: string | null
   barcode: string | null
   requires_prescription: boolean
@@ -45,31 +47,66 @@ export interface Medicine {
   updated_at: string
   profit_per_unit: string
   days_to_expiry: number
+  unit_conversions: MedicineUnitConversion[]
+  batches: MedicineBatch[]
 }
 
 export type MedicineUnit = 'pieces' | 'tablets' | 'capsules' | 'bottles' | 'boxes' | 'strips' | 'vials' | 'tubes' | 'sachets'
+
+export interface MedicineUnitConversion {
+  id: string
+  unit_name: string
+  factor_to_base_unit: number
+  is_base_unit: boolean
+  allow_purchase: boolean
+  allow_sale: boolean
+  is_active: boolean
+  sort_order: number
+}
+
+export interface MedicineBatch {
+  id: string
+  batch_number: string
+  manufacture_date: string | null
+  expiry_date: string
+  purchase_price: string
+  selling_price: string | null
+  quantity_received: number
+  quantity_on_hand: number
+  received_at: string
+  supplier: string | null
+  supplier_name: string | null
+  is_active: boolean
+  is_legacy: boolean
+  notes: string | null
+}
 
 export interface MedicineCreatePayload {
   name: string
   generic_name?: string
   category: string
   supplier: string
-  batch_number?: string
-  manufacture_date?: string
-  expiry_date: string
-  purchase_price?: string
-  selling_price?: string
-  stock_quantity?: number
+  base_unit: MedicineUnit
+  selling_price: string
   min_stock_level?: number
   max_stock_level?: number
-  unit?: MedicineUnit
   storage_location?: string
   barcode?: string
   requires_prescription?: boolean
   is_active?: boolean
+  unit_conversions?: MedicineUnitConversionPayload[]
 }
 
 export interface MedicineUpdatePayload extends Partial<MedicineCreatePayload> {}
+
+export interface MedicineUnitConversionPayload {
+  unit_name: string
+  factor_to_base_unit: number
+  allow_purchase?: boolean
+  allow_sale?: boolean
+  is_active?: boolean
+  sort_order?: number
+}
 
 export interface StockAdjustment {
   adjustment_type: 'increase' | 'decrease'

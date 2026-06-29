@@ -31,10 +31,28 @@ export interface SaleItem {
   id: string
   medicine: string
   medicine_name: string
+  medicine_display_id?: string
   quantity: number
   unit_price: string
   batch_number: string
   subtotal: string
+  unit_conversion?: string | null
+  sold_unit_name?: string | null
+  sold_quantity_in_unit?: number | null
+  selling_price_snapshot?: string | null
+  cost_price_snapshot?: string | null
+  profit?: number
+  refunded_quantity?: number
+  batch_allocations?: SaleItemBatchAllocation[]
+}
+
+export interface SaleItemBatchAllocation {
+  batch_id: string
+  batch_number: string
+  quantity: number
+  cost_price_snapshot: number
+  selling_price_snapshot: number
+  returned_quantity: number
 }
 
 export interface Payment {
@@ -83,7 +101,9 @@ export interface SaleItemPayload {
   medicine: string
   quantity: number
   unit_price?: string
+  unit_name?: string
   batch_number?: string
+  batch_allocations?: { batch_id: string; quantity: number }[]
 }
 
 export interface SaleCreatePayload {

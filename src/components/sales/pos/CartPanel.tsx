@@ -4,7 +4,6 @@ import { Loader2, ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Customer, PaymentMethod } from '@/types/sales'
-import type { Medicine } from '@/types/inventory'
 import type { PosCartLine } from './types'
 import { CartItemsList } from './CartItemsList'
 import { CustomerSection } from './CustomerSection'
@@ -30,9 +29,9 @@ interface CartPanelProps {
   onCustomerChange: (value: string) => void
   onNotesChange: (value: string) => void
   onPaymentMethodChange: (value: PaymentMethod) => void
-  onRemoveItem: (medicineId: string) => void
+  onRemoveItem: (lineId: string) => void
   onSubmit: () => void
-  onUpdateQuantity: (medicine: Medicine, quantity: number) => void
+  onUpdateQuantity: (item: PosCartLine, quantity: number) => void
 }
 
 export function CartPanel(props: CartPanelProps) {

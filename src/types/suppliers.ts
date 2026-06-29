@@ -31,11 +31,18 @@ export interface PurchaseItem {
   medicine_name: string
   medicine_display_id: string
   quantity: number
+  quantity_base_units?: number
+  quantity_in_unit?: number | null
+  unit_conversion?: string | null
+  unit_name?: string | null
   unit_price: string
+  cost_price_snapshot?: string | null
   discount_percent: string
   tax_percent: string
   subtotal: string
   received_quantity: number
+  batch?: string | null
+  batch_number?: string | null
 }
 
 export interface Purchase {
@@ -63,6 +70,7 @@ export interface PurchaseItemPayload {
   medicine: string
   quantity: number
   unit_price: string
+  unit_name?: string
   batch_number?: string
   expiry_date?: string
   manufacture_date?: string

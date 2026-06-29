@@ -180,13 +180,16 @@ export function PurchaseDetail({ open, onOpenChange, purchase }: PurchaseDetailP
               {purchaseItems.map((item) => (
                 <div
                   key={item.id}
-                  className="grid gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 lg:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,0.75fr))]"
+                  className="grid gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 lg:grid-cols-[minmax(0,1.4fr)_repeat(5,minmax(0,0.7fr))]"
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-semibold">{item.medicine_name}</p>
-                    <p className="text-xs text-muted-foreground">{item.medicine_display_id}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[item.medicine_display_id, item.batch_number, item.unit_name].filter(Boolean).join(' · ')}
+                    </p>
                   </div>
-                  <PurchaseCompactStat label="Ordered" value={`${item.quantity}`} />
+                  <PurchaseCompactStat label="Ordered" value={`${item.quantity_in_unit ?? item.quantity} ${item.unit_name || ''}`.trim()} />
+                  <PurchaseCompactStat label="Base Units" value={`${item.quantity_base_units ?? item.quantity}`} />
                   <PurchaseCompactStat label="Received" value={`${item.received_quantity}`} />
                   <PurchaseCompactStat label="Unit Price" value={formatTzsCurrency(item.unit_price)} />
                   <PurchaseCompactStat label="Subtotal" value={formatTzsCurrency(item.subtotal)} />

@@ -7,14 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { cn } from '@/lib/utils'
 import { formatTzsCurrency } from '@/lib/currency'
 import type { Medicine } from '@/types/inventory'
-import { getStockTone, isMedicineExpired, isMedicineExpiringSoon } from './utils'
+import { getMaxSellableUnits, getSaleUnits, getStockTone, getUnitPriceFromBase, isMedicineExpired, isMedicineExpiringSoon } from './utils'
 
 interface MedicineResultsCardProps {
   medicines: Medicine[]
   isLoading: boolean
   highlightedIndex: number
   searchQuery: string
-  onAddToCart: (medicine: Medicine) => void
+  onAddToCart: (medicine: Medicine, unitName?: string) => void
   onOpenDetails: (medicine: Medicine) => void
 }
 
@@ -72,6 +72,9 @@ export function MedicineResultsCard({
             {medicines.map((medicine, index) => {
               const outOfStock = getStockTone(medicine) === 'out'
               const expired = isMedicineExpired(medicine)
+              const defaultUnit = getSaleUnits(medicine)[0]
+              const unitPrice = getUnitPriceFromBase(medicine.selling_price, defaultUnit.factor_to_base_unit)
+              const availableInSelectedUnit = getMaxSellableUnits(medicine, defaultUnit.unit_name)
 
               return (
                 <div
@@ -102,16 +105,18 @@ export function MedicineResultsCard({
                       </p>
                       <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
                         <span>Batch: {medicine.batch_number || 'N/A'}</span>
-                        <span>Stock: {medicine.stock_quantity} {medicine.unit}</span>
-                        <span>Expiry: {medicine.expiry_date}</span>
+                        <span>Stock: {availableInSelectedUnit} {defaultUnit.unit_name} ({medicine.stock_quantity} {medicine.base_unit})</span>
+                        <span>Conversion: 1 {defaultUnit.unit_name} = {defaultUnit.factor_to_base_unit} {medicine.base_unit}</span>
+                        <span>Expiry: {medicine.expiry_date || 'Pending batch'}</span>
                         {medicine.supplier_name && <span>Manufacturer: {medicine.supplier_name}</span>}
+                        {medicine.unit_review_required && <span>Unit review needed</span>}
                       </div>
                     </div>
 
                     <div className="flex min-w-[190px] flex-col items-start gap-3 lg:items-end">
                       <div className="text-left lg:text-right">
-                        <p className="text-lg font-semibold">{formatTzsCurrency(medicine.selling_price)}</p>
-                        <p className="text-xs text-muted-foreground">per {medicine.unit}</p>
+                        <p className="text-lg font-semibold">{formatTzsCurrency(unitPrice)}</p>
+                        <p className="text-xs text-muted-foreground">per {defaultUnit.unit_name}</p>
                       </div>
                       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                         <Button
@@ -131,7 +136,7 @@ export function MedicineResultsCard({
                           disabled={outOfStock || expired}
                           onClick={(event) => {
                             event.stopPropagation()
-                            onAddToCart(medicine)
+                            onAddToCart(medicine, defaultUnit.unit_name)
                           }}
                         >
                           Add to Cart

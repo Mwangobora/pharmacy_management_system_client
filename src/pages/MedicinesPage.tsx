@@ -52,11 +52,31 @@ export default function MedicinesPage() {
   }
 
   const columns: Column<Medicine>[] = [
-    { key: 'name', header: 'Name', cell: (item) => <div><p className="font-medium">{item.name}</p><p className="text-xs text-muted-foreground">{item.generic_name}</p></div> },
+    {
+      key: 'name',
+      header: 'Name',
+      cell: (item) => (
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="font-medium">{item.name}</p>
+            {item.unit_review_required ? <Badge variant="outline">Review unit</Badge> : null}
+          </div>
+          <p className="text-xs text-muted-foreground">{[item.generic_name, item.base_unit].filter(Boolean).join(' · ')}</p>
+        </div>
+      ),
+    },
     { key: 'category', header: 'Category', cell: (item) => item.category_name },
-    { key: 'stock', header: 'Stock', cell: (item) => <div className="flex items-center gap-2"><span>{item.stock_quantity} {item.unit}</span>{getStockBadge(item)}</div> },
+    { key: 'stock', header: 'Stock', cell: (item) => <div className="flex items-center gap-2"><span>{item.stock_quantity} {item.base_unit}</span>{getStockBadge(item)}</div> },
     { key: 'price', header: 'Price', cell: (item) => formatTzsCurrency(item.selling_price) },
-    { key: 'expiry', header: 'Expiry', cell: (item) => <span className={item.days_to_expiry <= 30 ? 'text-destructive' : ''}>{item.expiry_date}</span> },
+    {
+      key: 'expiry',
+      header: 'Next Expiry',
+      cell: (item) => (
+        <span className={item.days_to_expiry !== null && item.days_to_expiry <= 30 ? 'text-destructive' : ''}>
+          {item.expiry_date || 'Pending batch'}
+        </span>
+      ),
+    },
     { key: 'actions', header: '', className: 'w-[100px]', cell: (item) => (
       <div className="flex items-center gap-1">
         <Button variant="ghost" size="icon" onClick={() => handleView(item)}><Eye className="h-4 w-4" /></Button>

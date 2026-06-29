@@ -39,7 +39,7 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
           }
 
   const expiryState: MedicineStatusState =
-    medicine.days_to_expiry <= 30
+    medicine.days_to_expiry !== null && medicine.days_to_expiry <= 30
       ? {
           label: 'Expiring soon',
           tone:
@@ -54,8 +54,8 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
   const manufactureDateLabel = formatDate(medicine.manufacture_date)
   const expiryDateLabel = formatDate(medicine.expiry_date)
   const sellingPrice = formatTzsCurrency(medicine.selling_price)
-  const purchasePrice = formatTzsCurrency(medicine.purchase_price)
-  const profitPerUnit = formatTzsCurrency(medicine.profit_per_unit)
+  const purchasePrice = medicine.purchase_price ? formatTzsCurrency(medicine.purchase_price) : 'Pending procurement'
+  const profitPerUnit = medicine.profit_per_unit ? formatTzsCurrency(medicine.profit_per_unit) : 'Pending procurement'
 
   return (
     <ResponsiveModal
@@ -73,7 +73,7 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
           sellingPrice={sellingPrice}
           purchasePrice={purchasePrice}
           profitPerUnit={profitPerUnit}
-          expiryLabel={`${medicine.days_to_expiry} days`}
+          expiryLabel={medicine.days_to_expiry === null ? 'Pending batch' : `${medicine.days_to_expiry} days`}
           expiryDateLabel={expiryDateLabel}
         />
 
@@ -85,7 +85,7 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
             items={[
               { label: 'Category', value: medicine.category_name },
               { label: 'Supplier', value: medicine.supplier_name },
-              { label: 'Unit Type', value: medicine.unit },
+              { label: 'Base Unit', value: medicine.base_unit },
               { label: 'Barcode', value: medicine.barcode || 'Not assigned' },
             ]}
           />
@@ -98,7 +98,7 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
               { label: 'Storage Location', value: medicine.storage_location || 'Not assigned' },
               { label: 'Prescription', value: medicine.requires_prescription ? 'Required' : 'Not required' },
               { label: 'Status', value: medicine.is_active ? 'Available for sale' : 'Hidden from operations' },
-              { label: 'Batch', value: medicine.batch_number },
+              { label: 'Unit Review', value: medicine.unit_review_required ? 'Needs admin review' : 'Confirmed' },
             ]}
           />
         </div>
@@ -127,8 +127,8 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
                   icon={AlertTriangle}
                   label="Expires"
                   value={expiryDateLabel}
-                  caption={`${medicine.days_to_expiry} days remaining`}
-                  tone={medicine.days_to_expiry <= 30 ? 'danger' : 'default'}
+                  caption={medicine.days_to_expiry === null ? 'No received batch yet' : `${medicine.days_to_expiry} days remaining`}
+                  tone={medicine.days_to_expiry !== null && medicine.days_to_expiry <= 30 ? 'danger' : 'default'}
                 />
               </div>
             </CardContent>
@@ -147,10 +147,18 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
               </div>
 
               <div className="space-y-3">
-                <MedicineQuickRow label="Batch Number" value={medicine.batch_number} />
+                <MedicineQuickRow label="Batch Number" value={medicine.batch_number || 'Pending first purchase'} />
                 <MedicineQuickRow
                   label="Shelf Slot"
                   value={medicine.storage_location || 'Pending assignment'}
+                />
+                <MedicineQuickRow
+                  label="Package Conversions"
+                  value={
+                    medicine.unit_conversions.filter((item) => !item.is_base_unit).length > 0
+                      ? medicine.unit_conversions.filter((item) => !item.is_base_unit).map((item) => `1 ${item.unit_name} = ${item.factor_to_base_unit} ${medicine.base_unit}`).join(', ')
+                      : 'No package conversions configured'
+                  }
                 />
                 <MedicineQuickRow
                   label="Barcode"

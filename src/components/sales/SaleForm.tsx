@@ -17,10 +17,12 @@ import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreateSale, useUpdateSale } from '@/hooks/mutations/useSales'
 import type { PaymentMethod, Sale } from '@/types/sales'
 import { formatTzsCurrency } from '@/lib/currency'
+import { getSaleUnits, getUnitConversion, getUnitPriceFromBase } from './pos/utils'
 
 const itemSchema = z.object({
   medicine: z.string().min(1, 'Medicine is required'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
+  unit_name: z.string().min(1, 'Selling unit is required'),
 })
 
 const schema = z.object({
@@ -107,7 +109,8 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
     for (const item of watchedItems) {
       const medicine = safeMedicines.find((m) => m.id === item.medicine)
       if (!medicine) continue
-      const unitPrice = Number(medicine.selling_price)
+      const conversion = getUnitConversion(medicine, item.unit_name || medicine.base_unit || medicine.unit)
+      const unitPrice = getUnitPriceFromBase(medicine.selling_price, conversion.factor_to_base_unit)
       const qty = Number(item.quantity || 0)
       subtotal += unitPrice * qty
     }
@@ -139,6 +142,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
           items: data.items.map((item) => ({
             medicine: item.medicine,
             quantity: item.quantity,
+            unit_name: item.unit_name || undefined,
           })),
         })
         toast.success('Sale created successfully')
@@ -207,10 +211,10 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
           </FormSection>
 
           {!isEditing && (
-            <FormSection title="Items" description="Select medicine and quantity. Price is applied automatically.">
+          <FormSection title="Items" description="Select the selling unit and quantity. The form shows the conversion, available quantity, and price before checkout.">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">Subtotal preview: {formatTzsCurrency(totalsPreview)}</p>
-                <Button type="button" variant="outline" size="sm" onClick={() => append({ medicine: '', quantity: 1 })}>
+                <Button type="button" variant="outline" size="sm" onClick={() => append({ medicine: '', quantity: 1, unit_name: '' })}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
                 </Button>
@@ -225,17 +229,26 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                   {fields.map((field, index) => {
                     const selectedMedicineId = watch(`items.${index}.medicine`)
                     const selectedMedicine = safeMedicines.find((medicine) => medicine.id === selectedMedicineId)
-                    const unitPrice = selectedMedicine ? Number(selectedMedicine.selling_price) : 0
+                    const selectedUnitName = watch(`items.${index}.unit_name`) || selectedMedicine?.base_unit || selectedMedicine?.unit
+                    const selectedUnit = selectedMedicine ? getUnitConversion(selectedMedicine, selectedUnitName) : null
+                    const unitPrice = selectedMedicine && selectedUnit
+                      ? getUnitPriceFromBase(selectedMedicine.selling_price, selectedUnit.factor_to_base_unit)
+                      : 0
                     const lineQty = Number(watch(`items.${index}.quantity`) || 0)
                     const lineTotal = unitPrice * lineQty
 
                     return (
                       <div key={field.id} className="rounded-lg border border-border/60 p-3">
-                        <div className="grid gap-3 md:grid-cols-6">
+                        <div className="grid gap-3 md:grid-cols-7">
                           <FormFieldWrapper label="Medicine" className="md:col-span-3" error={errors.items?.[index]?.medicine?.message}>
                             <Select
                               value={selectedMedicineId || ''}
-                              onValueChange={(value) => setValue(`items.${index}.medicine`, value, { shouldValidate: true })}
+                              onValueChange={(value) => {
+                                setValue(`items.${index}.medicine`, value, { shouldValidate: true })
+                                const medicine = safeMedicines.find((item) => item.id === value)
+                                const unit = medicine ? getSaleUnits(medicine)[0]?.unit_name ?? medicine.base_unit ?? medicine.unit : ''
+                                setValue(`items.${index}.unit_name`, unit, { shouldValidate: true })
+                              }}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select medicine" />
@@ -244,6 +257,25 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                                 {safeMedicines.map((medicine) => (
                                   <SelectItem key={medicine.id} value={medicine.id}>
                                     {medicine.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormFieldWrapper>
+
+                          <FormFieldWrapper label="Unit">
+                            <Select
+                              value={selectedUnitName || ''}
+                              onValueChange={(value) => setValue(`items.${index}.unit_name`, value, { shouldValidate: true })}
+                              disabled={!selectedMedicine}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Unit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(selectedMedicine ? getSaleUnits(selectedMedicine) : []).map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.unit_name}>
+                                    {unit.unit_name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -261,6 +293,26 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                           <FormFieldWrapper label="Line Total">
                             <Input value={lineTotal ? formatTzsCurrency(lineTotal) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
+                        </div>
+
+                        <div className="mt-3 grid gap-3 md:grid-cols-3">
+                          <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-sm">
+                            {selectedMedicine && selectedUnit
+                              ? `1 ${selectedUnit.unit_name} = ${selectedUnit.factor_to_base_unit} ${selectedMedicine.base_unit}`
+                              : 'Select a medicine and selling unit to see the conversion.'}
+                          </div>
+                          <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-sm">
+                            {selectedMedicine && selectedUnit
+                              ? `Available: ${Math.floor(selectedMedicine.stock_quantity / selectedUnit.factor_to_base_unit)} ${selectedUnit.unit_name} (${selectedMedicine.stock_quantity} ${selectedMedicine.base_unit})`
+                              : 'Available quantity appears here.'}
+                          </div>
+                          <div className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-sm">
+                            {selectedMedicine
+                              ? selectedMedicine.unit_review_required
+                                ? 'Legacy unit needs admin review before trusting pack counts.'
+                                : 'Base unit confirmed.'
+                              : 'Medicine unit status appears here.'}
+                          </div>
                         </div>
 
                         <div className="mt-2 flex justify-end">

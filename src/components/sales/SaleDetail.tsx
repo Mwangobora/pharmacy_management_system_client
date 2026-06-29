@@ -80,6 +80,37 @@ export function SaleDetail({ open, onOpenChange, sale }: SaleDetailProps) {
           <p className="text-sm text-muted-foreground">Notes</p>
           <p>{sale.notes || '-'}</p>
         </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium">Items</p>
+          {(sale.items || []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">No item lines recorded.</p>
+          ) : (
+            sale.items.map((item) => (
+              <div key={item.id} className="rounded-xl border border-border/60 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{item.medicine_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.sold_quantity_in_unit ?? item.quantity} {item.sold_unit_name || 'units'} at {formatTzsCurrency(item.unit_price)}
+                    </p>
+                  </div>
+                  <p className="font-medium">{formatTzsCurrency(item.subtotal)}</p>
+                </div>
+                {(item.batch_allocations || []).length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    {item.batch_allocations?.map((allocation) => (
+                      <div key={`${item.id}-${allocation.batch_id}`} className="flex items-center justify-between rounded-lg bg-muted/35 px-3 py-2 text-sm">
+                        <span>Batch {allocation.batch_number}</span>
+                        <span>{allocation.quantity} used{allocation.returned_quantity ? `, ${allocation.returned_quantity} returned` : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </ResponsiveModal>
   )

@@ -15,7 +15,17 @@ import { MedicineResultsCard } from './pos/MedicineResultsCard'
 import { MedicineSearchCard } from './pos/MedicineSearchCard'
 import { PosHeader } from './pos/PosHeader'
 import type { PosCartItem, PosCartLine } from './pos/types'
-import { buildPrescriptionNotes, formatPosDate, isMedicineExpired, matchesMedicineQuery, POS_RESULT_LIMIT } from './pos/utils'
+import {
+  buildPrescriptionNotes,
+  formatPosDate,
+  getMaxSellableUnits,
+  getSaleUnits,
+  getUnitConversion,
+  getUnitPriceFromBase,
+  isMedicineExpired,
+  matchesMedicineQuery,
+  POS_RESULT_LIMIT,
+} from './pos/utils'
 
 export function SalesPosWorkspace() {
   const [searchInput, setSearchInput] = useState('')
@@ -23,6 +33,7 @@ export function SalesPosWorkspace() {
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null)
   const [drawerQuantity, setDrawerQuantity] = useState(1)
+  const [drawerUnitName, setDrawerUnitName] = useState('')
   const [cart, setCart] = useState<PosCartItem[]>([])
   const [customerId, setCustomerId] = useState('walk-in')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
@@ -53,7 +64,16 @@ export function SalesPosWorkspace() {
   const medicinesById = useMemo(() => new Map(safeMedicines.map((medicine) => [medicine.id, medicine])), [safeMedicines])
   const cartItems = useMemo<PosCartLine[]>(() => cart.flatMap((item) => {
     const medicine = medicinesById.get(item.medicineId)
-    return medicine ? [{ ...item, medicine, lineTotal: Number(medicine.selling_price) * item.quantity }] : []
+    if (!medicine) return []
+    const conversion = getUnitConversion(medicine, item.unitName)
+    const unitPrice = getUnitPriceFromBase(medicine.selling_price, conversion.factor_to_base_unit)
+    return [{
+      ...item,
+      medicine,
+      factorToBaseUnit: conversion.factor_to_base_unit,
+      unitPrice,
+      lineTotal: unitPrice * item.quantity,
+    }]
   }), [cart, medicinesById])
 
   const selectedCustomer = customerId === 'walk-in' ? null : safeCustomers.find((customer) => customer.id === customerId) ?? null
@@ -68,6 +88,7 @@ export function SalesPosWorkspace() {
     setHighlightedIndex(0)
     setSelectedMedicine(null)
     setDrawerQuantity(1)
+    setDrawerUnitName('')
     setCart([])
     setCustomerId('walk-in')
     setPaymentMethod('cash')
@@ -75,22 +96,39 @@ export function SalesPosWorkspace() {
     setNotes('')
   }
 
-  const addMedicineToCart = (medicine: Medicine, quantity = 1) => {
-    if (isMedicineExpired(medicine) || medicine.stock_quantity <= 0) return
+  useEffect(() => {
+    if (!selectedMedicine) return
+    const defaultUnit = getSaleUnits(selectedMedicine)[0]?.unit_name ?? selectedMedicine.base_unit ?? selectedMedicine.unit
+    setDrawerUnitName(defaultUnit)
+    setDrawerQuantity(1)
+  }, [selectedMedicine])
+
+  const addMedicineToCart = (medicine: Medicine, quantity = 1, unitName?: string) => {
+    const resolvedUnitName = unitName || getSaleUnits(medicine)[0]?.unit_name || medicine.base_unit || medicine.unit
+    const maxSellableUnits = getMaxSellableUnits(medicine, resolvedUnitName)
+    if (isMedicineExpired(medicine) || maxSellableUnits <= 0) return
+
+    const lineId = `${medicine.id}:${resolvedUnitName}`
     setCart((current) => {
-      const existing = current.find((item) => item.medicineId === medicine.id)
-      const nextQuantity = Math.min((existing?.quantity ?? 0) + quantity, medicine.stock_quantity)
+      const existing = current.find((item) => item.lineId === lineId)
+      const nextQuantity = Math.min((existing?.quantity ?? 0) + quantity, maxSellableUnits)
       return existing
-        ? current.map((item) => item.medicineId === medicine.id ? { ...item, quantity: nextQuantity } : item)
-        : [...current, { medicineId: medicine.id, quantity: nextQuantity }]
+        ? current.map((item) => item.lineId === lineId ? { ...item, quantity: nextQuantity } : item)
+        : [...current, { lineId, medicineId: medicine.id, quantity: nextQuantity, unitName: resolvedUnitName }]
     })
     setSelectedMedicine(null)
     setDrawerQuantity(1)
+    setDrawerUnitName('')
   }
 
-  const updateCartQuantity = (medicine: Medicine, quantity: number) => {
-    if (quantity <= 0) return setCart((current) => current.filter((item) => item.medicineId !== medicine.id))
-    setCart((current) => current.map((item) => item.medicineId === medicine.id ? { ...item, quantity: Math.min(quantity, medicine.stock_quantity) } : item))
+  const updateCartQuantity = (item: PosCartLine, quantity: number) => {
+    if (quantity <= 0) return setCart((current) => current.filter((entry) => entry.lineId !== item.lineId))
+    const maxSellableUnits = getMaxSellableUnits(item.medicine, item.unitName)
+    setCart((current) => current.map((entry) => (
+      entry.lineId === item.lineId
+        ? { ...entry, quantity: Math.min(quantity, maxSellableUnits) }
+        : entry
+    )))
   }
 
   const handleSubmitSale = async () => {
@@ -103,7 +141,12 @@ export function SalesPosWorkspace() {
         payment_method: paymentMethod,
         notes: buildPrescriptionNotes(notes, prescriptionItems),
         payment_amount: amountPaid ? numericAmountPaid.toFixed(2) : undefined,
-        items: cartItems.map((item) => ({ medicine: item.medicine.id, quantity: item.quantity, batch_number: item.medicine.batch_number || undefined })),
+        items: cartItems.map((item) => ({
+          medicine: item.medicine.id,
+          quantity: item.quantity,
+          unit_name: item.unitName,
+          batch_number: item.medicine.batch_number || undefined,
+        })),
       })
       toast.success('Sale completed successfully')
       resetSale()
@@ -125,7 +168,14 @@ export function SalesPosWorkspace() {
               if (event.key === 'ArrowUp') return setHighlightedIndex((current) => (current - 1 + filteredMedicines.length) % Math.max(filteredMedicines.length, 1))
               if (event.key === 'Enter' && activeHighlightedIndex >= 0) addMedicineToCart(filteredMedicines[activeHighlightedIndex], 1)
             }} />
-            <MedicineResultsCard medicines={filteredMedicines} isLoading={medicinesLoading} highlightedIndex={activeHighlightedIndex} searchQuery={searchQuery} onAddToCart={(medicine) => addMedicineToCart(medicine, 1)} onOpenDetails={setSelectedMedicine} />
+            <MedicineResultsCard
+              medicines={filteredMedicines}
+              isLoading={medicinesLoading}
+              highlightedIndex={activeHighlightedIndex}
+              searchQuery={searchQuery}
+              onAddToCart={(medicine, unitName) => addMedicineToCart(medicine, 1, unitName)}
+              onOpenDetails={setSelectedMedicine}
+            />
           </div>
 
           <div className="xl:sticky xl:top-4">
@@ -148,7 +198,7 @@ export function SalesPosWorkspace() {
               onCustomerChange={setCustomerId}
               onNotesChange={setNotes}
               onPaymentMethodChange={setPaymentMethod}
-              onRemoveItem={(medicineId) => setCart((current) => current.filter((item) => item.medicineId !== medicineId))}
+              onRemoveItem={(lineId) => setCart((current) => current.filter((item) => item.lineId !== lineId))}
               onSubmit={handleSubmitSale}
               onUpdateQuantity={updateCartQuantity}
             />
@@ -156,7 +206,21 @@ export function SalesPosWorkspace() {
         </div>
       </div>
 
-      <MedicineDetailsSheet medicine={selectedMedicine} quantity={drawerQuantity} onAddToCart={addMedicineToCart} onClose={() => { setSelectedMedicine(null); setDrawerQuantity(1) }} onQuantityChange={setDrawerQuantity} />
+      <MedicineDetailsSheet
+        medicine={selectedMedicine}
+        quantity={drawerQuantity}
+        unitName={drawerUnitName}
+        onAddToCart={addMedicineToCart}
+        onClose={() => { setSelectedMedicine(null); setDrawerQuantity(1); setDrawerUnitName('') }}
+        onQuantityChange={setDrawerQuantity}
+        onUnitNameChange={(value) => {
+          setDrawerUnitName(value)
+          if (selectedMedicine) {
+            const maxSellableUnits = getMaxSellableUnits(selectedMedicine, value)
+            setDrawerQuantity((current) => Math.min(current || 1, Math.max(maxSellableUnits, 1)))
+          }
+        }}
+      />
     </>
   )
 }
