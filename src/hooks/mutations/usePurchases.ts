@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PurchasesApi } from '@/api/SuppliersApi'
-import type { PurchaseCreatePayload, PurchaseUpdatePayload } from '@/types/suppliers'
+import type {
+  PurchaseCreatePayload,
+  PurchaseUpdatePayload,
+  UpdatePaymentStatusPayload,
+} from '@/types/suppliers'
 import { purchaseKeys } from '../queries/usePurchases'
 
 export function useCreatePurchase() {
@@ -34,6 +38,19 @@ export function useDeletePurchase() {
     mutationFn: (id: string) => PurchasesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: purchaseKeys.lists() })
+    },
+  })
+}
+
+export function useUpdatePurchasePaymentStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: UpdatePaymentStatusPayload }) =>
+      PurchasesApi.updatePaymentStatus(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: purchaseKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: purchaseKeys.detail(variables.id) })
     },
   })
 }

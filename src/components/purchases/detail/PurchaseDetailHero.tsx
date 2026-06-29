@@ -4,9 +4,11 @@ import { cn } from '@/lib/utils'
 import type { Purchase } from '@/types/suppliers'
 import type { PurchaseMetricItem } from '@/types/purchase-detail'
 import { PurchaseMetricCard } from './PurchaseMetricCard'
+import type { PurchaseItem } from '@/types/suppliers'
 
 interface PurchaseDetailHeroProps {
   purchase: Purchase
+  items: PurchaseItem[]
   paymentTone: string
   purchaseDateLabel: string
   netAmount: string
@@ -19,6 +21,7 @@ interface PurchaseDetailHeroProps {
 
 export function PurchaseDetailHero({
   purchase,
+  items,
   paymentTone,
   purchaseDateLabel,
   netAmount,
@@ -50,8 +53,8 @@ export function PurchaseDetailHero({
     {
       icon: Package,
       label: 'Received Stock',
-      value: `${purchase.items.reduce((sum, item) => sum + item.received_quantity, 0)} units`,
-      hint: `${purchase.items.reduce((sum, item) => sum + item.quantity, 0)} units ordered`,
+      value: `${items.reduce((sum, item) => sum + item.received_quantity, 0)} units`,
+      hint: `${items.reduce((sum, item) => sum + item.quantity, 0)} units ordered`,
     },
   ]
 
@@ -75,7 +78,7 @@ export function PurchaseDetailHero({
             <Badge className={cn('border px-3 py-1 text-xs font-medium capitalize', paymentTone)}>
               {purchase.payment_status}
             </Badge>
-            <Badge variant="secondary">{purchase.items.length} line items</Badge>
+            <Badge variant="secondary">{items.length} line items</Badge>
           </div>
         </div>
 
@@ -88,4 +91,3 @@ export function PurchaseDetailHero({
     </section>
   )
 }
-

@@ -18,7 +18,23 @@ export function DashboardKpiCard({
 }: DashboardKpiCardProps) {
   const change = formatPercentChange(metric.percentage_change)
   const positive = (metric.percentage_change || 0) >= 0
-  const isCount = ['sales_count', 'items_sold', 'low_stock', 'expired', 'out_of_stock_items', 'active_medicines', 'available_batches', 'refund_events'].includes(metric.key)
+  const isCount = [
+    'sales_count',
+    'items_sold',
+    'low_stock',
+    'low_stock_items',
+    'expired',
+    'expiring_soon',
+    'out_of_stock_items',
+    'active_medicines',
+    'available_batches',
+    'refund_events',
+    'sales_today',
+    'pending_sales',
+    'pending_purchase_payments',
+    'failed_payments',
+    'returns_awaiting_review',
+  ].includes(metric.key)
   const value = metric.restricted
     ? 'Restricted'
     : isCount
