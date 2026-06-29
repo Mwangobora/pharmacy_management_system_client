@@ -2,6 +2,7 @@ export interface PermissionDetail {
   id: number
   name: string
   codename: string
+  content_type?: number
   module?: string
   resource?: string
   action?: string

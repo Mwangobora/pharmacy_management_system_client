@@ -1,133 +1,118 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { AlertTriangle, Clock, Package, Pill, Receipt, TrendingUp, Truck, Users } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { StatCard } from '@/components/StatCard'
-import { useDashboardStats, useExpiringSoonMedicines, useLowStockMedicines } from '@/hooks/queries/useMedicines'
-import { formatTzsCurrency } from '@/lib/currency'
-import { ROUTES } from '@/routes/paths'
+import { startTransition, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DashboardEmptyState } from '@/components/dashboard/DashboardEmptyState'
+import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
+import { FinanceDashboard } from '@/components/dashboard/tabs/FinanceDashboard'
+import { InventoryDashboard } from '@/components/dashboard/tabs/InventoryDashboard'
+import { OperationsDashboard } from '@/components/dashboard/tabs/OperationsDashboard'
+import { OverviewDashboard } from '@/components/dashboard/tabs/OverviewDashboard'
+import { PerformanceDashboard } from '@/components/dashboard/tabs/PerformanceDashboard'
+import { SalesDashboard } from '@/components/dashboard/tabs/SalesDashboard'
+import { useDashboardFiltersOptions } from '@/hooks/queries/useDashboard'
+import { useDashboardFilters } from '@/hooks/dashboard/useDashboardFilters'
+import { usePermissions } from '@/hooks/usePermissions'
+import type { DashboardPreset } from '@/types/dashboard'
 
-const quickLinks = [
-  { name: 'POS Home', href: ROUTES.HOME, icon: Receipt, color: 'bg-primary' },
-  { name: 'Categories', href: ROUTES.CATEGORIES, icon: Package, color: 'bg-blue-500' },
-  { name: 'Medicines', href: ROUTES.MEDICINES, icon: Pill, color: 'bg-green-500' },
-  { name: 'Suppliers', href: ROUTES.SUPPLIERS, icon: Truck, color: 'bg-orange-500' },
-  { name: 'Customers', href: ROUTES.CUSTOMERS, icon: Users, color: 'bg-pink-500' },
-]
-
-function SummaryListCard({
-  title,
-  description,
-  emptyMessage,
-  loading,
-  items,
-}: {
-  title: string
-  description: string
-  emptyMessage: string
-  loading: boolean
-  items: ReactNode[]
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
-        ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
-        ) : (
-          <div className="space-y-2">{items}</div>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
+const dashboardTabs = [
+  { value: 'overview', label: 'Overview', permission: 'dashboard.overview.view' },
+  { value: 'sales', label: 'Sales', permission: 'dashboard.sales.view' },
+  { value: 'inventory', label: 'Inventory', permission: 'dashboard.inventory.view' },
+  { value: 'finance', label: 'Finance', permission: 'dashboard.finance.view' },
+  { value: 'operations', label: 'Operations', permission: 'dashboard.operations.view' },
+  { value: 'performance', label: 'Performance', permission: 'dashboard.performance.view' },
+] as const
 
 export default function DashboardPage() {
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: lowStock = [], isLoading: lowStockLoading } = useLowStockMedicines()
-  const { data: expiringSoon = [], isLoading: expiringLoading } = useExpiringSoonMedicines()
+  const permissions = usePermissions()
+  const availableTabs = useMemo(
+    () => dashboardTabs.filter((tab) => permissions.includes(tab.permission)),
+    [permissions]
+  )
+  const [activeTab, setActiveTab] = useState<string>(availableTabs[0]?.value ?? 'overview')
+  const filterState = useDashboardFilters()
+  const { data: filterOptions, refetch, isFetching } = useDashboardFiltersOptions()
+  const presetLabels: Record<DashboardPreset, string> = {
+    today: 'Today',
+    yesterday: 'Yesterday',
+    last_7_days: 'Last 7 days',
+    last_30_days: 'Last 30 days',
+    this_month: 'This month',
+    last_month: 'Last month',
+    this_quarter: 'This quarter',
+    this_year: 'This year',
+    custom: filterState.dateFrom && filterState.dateTo
+      ? `${new Intl.DateTimeFormat('en-TZ', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(filterState.dateFrom))} - ${new Intl.DateTimeFormat('en-TZ', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(filterState.dateTo))}`
+      : 'Custom range',
+  }
+
+  const refreshDashboard = async () => {
+    await refetch()
+    toast.success('Dashboard refreshed successfully', {
+      description: 'Latest pharmacy data has been loaded.',
+    })
+  }
+
+  if (availableTabs.length === 0) {
+    return (
+      <DashboardEmptyState
+        title="No dashboard access"
+        description="This account does not currently have permission to view any dashboard tab."
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Inventory health, alerts, and quick navigation across the pharmacy.</p>
-      </div>
+      <DashboardHeader
+        period={{ preset: filterState.preset, date_from: '', date_to: '', label: presetLabels[filterState.preset] }}
+        isRefreshing={isFetching}
+        onRefresh={refreshDashboard}
+      />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />) : (
-          <>
-            <StatCard title="Total Medicines" value={stats?.total_medicines || 0} icon={Pill} />
-            <StatCard title="Low Stock" value={stats?.low_stock_count || 0} icon={AlertTriangle} description="Needs attention" />
-            <StatCard title="Expiring Soon" value={stats?.expiring_soon_count || 0} icon={Clock} description="Within 30 days" />
-            <StatCard title="Total Value" value={formatTzsCurrency(stats?.total_stock_value ?? stats?.total_value ?? '0')} icon={TrendingUp} />
-          </>
-        )}
-      </div>
+      <DashboardFilters
+        preset={filterState.preset}
+        dateFrom={filterState.dateFrom}
+        dateTo={filterState.dateTo}
+        cashierId={filterState.cashierId}
+        paymentMethod={filterState.paymentMethod}
+        options={filterOptions}
+        onPresetChange={filterState.setPreset}
+        onDateFromChange={filterState.setDateFrom}
+        onDateToChange={filterState.setDateTo}
+        onCashierChange={filterState.setCashierId}
+        onPaymentMethodChange={filterState.setPaymentMethod}
+      />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SummaryListCard
-          title="Low Stock Alerts"
-          description="Medicines that need restocking"
-          emptyMessage="No low stock items"
-          loading={lowStockLoading}
-          items={lowStock.slice(0, 5).map((med) => (
-            <div key={med.id} className="flex items-center justify-between rounded-lg border p-3">
-              <div>
-                <p className="font-medium">{med.name}</p>
-                <p className="text-xs text-muted-foreground">{med.category_name}</p>
-              </div>
-              <span className="text-sm font-medium text-destructive">{med.stock_quantity} left</span>
-            </div>
+      <Tabs value={activeTab} onValueChange={(value) => startTransition(() => setActiveTab(value))} className="space-y-6">
+        <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto rounded-3xl bg-muted/50 p-2">
+          {availableTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="rounded-2xl px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {tab.label}
+            </TabsTrigger>
           ))}
-        />
+        </TabsList>
 
-        <SummaryListCard
-          title="Expiring Soon"
-          description="Medicines expiring within 30 days"
-          emptyMessage="No medicines expiring soon"
-          loading={expiringLoading}
-          items={expiringSoon.slice(0, 5).map((med) => (
-            <div key={med.id} className="flex items-center justify-between rounded-lg border p-3">
-              <div>
-                <p className="font-medium">{med.name}</p>
-                <p className="text-xs text-muted-foreground">Batch: {med.batch_number}</p>
-              </div>
-              <span className="text-sm font-medium text-orange-500">{med.days_to_expiry} days</span>
-            </div>
-          ))}
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Links</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            {quickLinks.map((link) => (
-              <Link key={link.name} to={link.href} className="flex flex-col items-center gap-2 rounded-lg border p-4 transition-colors hover:bg-accent">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${link.color} text-white`}>
-                  <link.icon className="h-5 w-5" />
-                </div>
-                <span className="text-sm font-medium">{link.name}</span>
-              </Link>
-            ))}
-          </div>
-          {lowStock.length > 5 && (
-            <Button variant="link" asChild className="mt-4 px-0">
-              <Link to={ROUTES.MEDICINES}>View all low stock items ({lowStock.length})</Link>
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="overview">
+          <OverviewDashboard filters={filterState.queryParams} active={activeTab === 'overview'} />
+        </TabsContent>
+        <TabsContent value="sales">
+          <SalesDashboard filters={filterState.queryParams} active={activeTab === 'sales'} />
+        </TabsContent>
+        <TabsContent value="inventory">
+          <InventoryDashboard filters={filterState.queryParams} active={activeTab === 'inventory'} />
+        </TabsContent>
+        <TabsContent value="finance">
+          <FinanceDashboard filters={filterState.queryParams} active={activeTab === 'finance'} />
+        </TabsContent>
+        <TabsContent value="operations">
+          <OperationsDashboard filters={filterState.queryParams} active={activeTab === 'operations'} />
+        </TabsContent>
+        <TabsContent value="performance">
+          <PerformanceDashboard filters={filterState.queryParams} active={activeTab === 'performance'} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

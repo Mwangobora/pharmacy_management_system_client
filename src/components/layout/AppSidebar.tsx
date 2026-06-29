@@ -29,7 +29,20 @@ type NavItem = {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Dashboard', href: ROUTES.DASHBOARD_OVERVIEW, icon: LayoutDashboard, iconClass: 'text-sky-500 dark:text-sky-400' },
+  {
+    name: 'Dashboard',
+    href: ROUTES.DASHBOARD_OVERVIEW,
+    icon: LayoutDashboard,
+    iconClass: 'text-sky-500 dark:text-sky-400',
+    anyPermissions: [
+      'dashboard.overview.view',
+      'dashboard.sales.view',
+      'dashboard.inventory.view',
+      'dashboard.finance.view',
+      'dashboard.operations.view',
+      'dashboard.performance.view',
+    ],
+  },
   { name: 'Home', href: ROUTES.HOME, icon: Home, iconClass: 'text-primary dark:text-primary' },
   {
     name: 'Sales & Billing',

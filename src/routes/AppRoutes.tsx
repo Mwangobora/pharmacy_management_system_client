@@ -43,7 +43,23 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.DASHBOARD} element={<DashboardLayout />}>
             <Route index element={<Navigate to={ROUTES.DASHBOARD_OVERVIEW} replace />} />
-            <Route path="overview" element={<DashboardPage />} />
+            <Route
+              path="overview"
+              element={
+                <RoleGuard
+                  requiredPermissions={[
+                    'dashboard.overview.view',
+                    'dashboard.sales.view',
+                    'dashboard.inventory.view',
+                    'dashboard.finance.view',
+                    'dashboard.operations.view',
+                    'dashboard.performance.view',
+                  ]}
+                />
+              }
+            >
+              <Route index element={<DashboardPage />} />
+            </Route>
             <Route path="home" element={<HomePage />} />
             <Route path="profile" element={<ProfilePage />} />
 

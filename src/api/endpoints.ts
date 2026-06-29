@@ -10,6 +10,15 @@ export const ENDPOINTS = {
   AUTH_SET_PASSWORD: '/api/auth/users/set_password/',
   AUTH_SYNC_ACCESS: '/api/auth/sync/',
 
+  // Dashboard
+  DASHBOARD_FILTERS: '/api/dashboard/filters/',
+  DASHBOARD_OVERVIEW: '/api/dashboard/overview/',
+  DASHBOARD_SALES: '/api/dashboard/sales/',
+  DASHBOARD_INVENTORY: '/api/dashboard/inventory/',
+  DASHBOARD_FINANCE: '/api/dashboard/finance/',
+  DASHBOARD_OPERATIONS: '/api/dashboard/operations/',
+  DASHBOARD_PERFORMANCE: '/api/dashboard/performance/',
+
   // Users
   USERS: '/api/users/',
   USERS_AUTH_INFO: '/api/users/auth_info/',
