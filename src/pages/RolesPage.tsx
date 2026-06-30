@@ -108,6 +108,7 @@ export default function RolesPage() {
         isLoading={isLoading}
         keyExtractor={(item) => String(item.id)}
         emptyMessage="No roles found"
+        onRowClick={handleView}
       />
 
       <RoleForm open={formOpen} onOpenChange={setFormOpen} role={selectedRole} />

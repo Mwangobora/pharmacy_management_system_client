@@ -105,6 +105,7 @@ export default function PurchasesPage() {
         isLoading={isLoading}
         keyExtractor={(item) => item.id}
         emptyMessage="No purchases found"
+        onRowClick={handleView}
       />
 
       <PurchaseForm open={formOpen} onOpenChange={setFormOpen} purchase={selectedPurchase} />

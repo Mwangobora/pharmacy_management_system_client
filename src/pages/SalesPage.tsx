@@ -113,6 +113,7 @@ export default function SalesPage() {
               isLoading={isLoading}
               keyExtractor={(item) => item.id}
               emptyMessage="No sales found"
+              onRowClick={handleView}
             />
           )}
         </CardContent>

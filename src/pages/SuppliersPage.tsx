@@ -105,6 +105,7 @@ export default function SuppliersPage() {
         isLoading={isLoading}
         keyExtractor={(item) => item.id}
         emptyMessage="No suppliers found"
+        onRowClick={handleView}
       />
 
       <SupplierForm open={formOpen} onOpenChange={setFormOpen} supplier={selectedSupplier} />

@@ -157,6 +157,7 @@ export default function UsersPage() {
         isLoading={isLoading}
         keyExtractor={(item) => item.id}
         emptyMessage="No users found"
+        onRowClick={handleView}
       />
 
       <UserForm open={formOpen} onOpenChange={setFormOpen} user={selectedUser} />

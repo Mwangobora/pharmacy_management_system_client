@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Pill } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { LoginImageSlideshow } from '@/components/auth/LoginImageSlideshow'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormFieldWrapper } from '@/components/forms/FormPrimitives'
@@ -68,39 +69,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col lg:flex-row bg-background">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-between bg-zinc-950 p-12 text-white border-r">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Pill className="h-6 w-6" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">PharmaCare Enterprise</span>
-        </div>
-        
-        <div className="space-y-6">
-          <blockquote className="space-y-2">
-            <p className="text-2xl font-medium leading-normal">
-              &ldquo;Streamline your pharmacy operations with our comprehensive management system. 
-              From inventory tracking to seamless staff management.&rdquo;
-            </p>
-            <footer className="text-base text-zinc-400">
-              Reliable infrastructure for modern healthcare.
-            </footer>
-          </blockquote>
-        </div>
-      </div>
+    <div className="flex min-h-screen w-full flex-col bg-background md:flex-row">
+      <LoginImageSlideshow />
 
       {/* Right Panel - Login Form */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-8 sm:p-12 md:p-16">
-        <motion.div 
+      <div className="flex w-full items-center justify-center p-8 sm:p-12 md:w-[56%] md:p-12 lg:w-1/2 lg:p-16">
+        <motion.div
           className="w-full max-w-[400px] space-y-8"
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex flex-col space-y-2 text-center lg:text-left">
-            <div className="lg:hidden mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground md:hidden">
               <Pill className="h-6 w-6" />
             </div>
             <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>

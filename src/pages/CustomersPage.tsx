@@ -100,6 +100,7 @@ export default function CustomersPage() {
         isLoading={isLoading}
         keyExtractor={(item) => item.id}
         emptyMessage="No customers found"
+        onRowClick={handleView}
       />
 
       <CustomerForm open={formOpen} onOpenChange={setFormOpen} customer={selectedCustomer} />

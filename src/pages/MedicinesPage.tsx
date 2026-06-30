@@ -118,7 +118,14 @@ export default function MedicinesPage() {
           </SelectContent>
         </Select>
       </div>
-      <DataTable columns={columns} data={medicines} isLoading={isLoading} keyExtractor={(item) => item.id} emptyMessage="No medicines found" />
+      <DataTable
+        columns={columns}
+        data={medicines}
+        isLoading={isLoading}
+        keyExtractor={(item) => item.id}
+        emptyMessage="No medicines found"
+        onRowClick={handleView}
+      />
       <MedicineForm open={formOpen} onOpenChange={setFormOpen} medicine={selectedMedicine} />
       <MedicineDetail open={detailOpen} onOpenChange={setDetailOpen} medicine={selectedMedicine} />
       <ConfirmDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)} title="Delete Medicine" description="Are you sure?" confirmLabel="Delete" variant="destructive" onConfirm={handleDelete} isLoading={deleteMedicine.isPending} />

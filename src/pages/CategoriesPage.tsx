@@ -103,7 +103,14 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={categories} isLoading={isLoading} keyExtractor={(item) => item.id} emptyMessage="No categories found" />
+      <DataTable
+        columns={columns}
+        data={categories}
+        isLoading={isLoading}
+        keyExtractor={(item) => item.id}
+        emptyMessage="No categories found"
+        onRowClick={handleView}
+      />
 
       <CategoryForm open={formOpen} onOpenChange={setFormOpen} category={selectedCategory} />
       <CategoryBulkForm open={bulkOpen} onOpenChange={setBulkOpen} />
