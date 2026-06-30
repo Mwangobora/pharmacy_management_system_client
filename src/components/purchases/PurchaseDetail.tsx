@@ -4,7 +4,6 @@ import {
   Truck,
   UserRound,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,6 +16,7 @@ import { PurchaseMoneyRow } from '@/components/purchases/detail/PurchaseMoneyRow
 import { PurchaseSectionTitle } from '@/components/purchases/detail/PurchaseSectionTitle'
 import { useUpdatePurchasePaymentStatus } from '@/hooks/mutations/usePurchases'
 import { usePurchase } from '@/hooks/queries/usePurchases'
+import { notify } from '@/lib/notify'
 import type { Purchase } from '@/types/suppliers'
 
 interface PurchaseDetailProps {
@@ -63,9 +63,14 @@ export function PurchaseDetail({ open, onOpenChange, purchase }: PurchaseDetailP
         id: resolvedPurchase.id,
         payload: { payment_status },
       })
-      toast.success(`Purchase marked as ${payment_status}`)
-    } catch {
-      toast.error('Failed to update purchase payment status')
+      notify.success(`Purchase marked as ${payment_status}`, {
+        description: 'The supplier payment status has been updated.',
+      })
+    } catch (error) {
+      notify.apiError(error, 'Purchase payment status could not be updated', {
+        fallback: 'The supplier payment verification could not be saved.',
+        persistent: true,
+      })
     }
   }
 

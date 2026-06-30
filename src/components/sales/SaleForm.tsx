@@ -5,7 +5,6 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -17,6 +16,7 @@ import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreateSale, useUpdateSale } from '@/hooks/mutations/useSales'
 import type { PaymentMethod, Sale } from '@/types/sales'
 import { formatTzsCurrency } from '@/lib/currency'
+import { notify } from '@/lib/notify'
 import { getSaleUnits, getUnitConversion, getUnitPriceFromBase } from './pos/utils'
 
 const itemSchema = z.object({
@@ -119,7 +119,9 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
 
   const onSubmit = async (data: FormData) => {
     if (!isEditing && data.items.length === 0) {
-      toast.error('Add at least one item')
+      notify.warning('Add at least one sale item', {
+        description: 'Select at least one medicine before completing the sale.',
+      })
       return
     }
 
@@ -133,7 +135,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
             customer: data.customer || undefined,
           },
         })
-        toast.success('Sale updated successfully')
+        notify.success('Sale updated successfully')
       } else {
         await createSale.mutateAsync({
           customer: data.customer || undefined,
@@ -145,11 +147,18 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
             unit_name: item.unit_name || undefined,
           })),
         })
-        toast.success('Sale created successfully')
+        notify.success('Sale completed successfully', {
+          description: 'The sale was saved and stock quantities were updated successfully.',
+        })
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update sale' : 'Failed to create sale')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Sale could not be updated' : 'Sale could not be completed', {
+        fallback: isEditing
+          ? 'The sale changes could not be saved.'
+          : 'The sale could not be completed because stock or payment details changed.',
+        persistent: !isEditing,
+      })
     }
   }
 

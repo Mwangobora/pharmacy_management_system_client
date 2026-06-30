@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -15,6 +14,7 @@ import { RoleForm } from '@/components/roles/RoleForm'
 import { RoleDetail } from '@/components/roles/RoleDetail'
 import { useRoles } from '@/hooks/queries/useRoles'
 import { useDeleteRole } from '@/hooks/mutations/useRoles'
+import { notify } from '@/lib/notify'
 import type { RoleDetail as Role } from '@/types/auth'
 
 export default function RolesPage() {
@@ -45,10 +45,12 @@ export default function RolesPage() {
     if (deleteId === null) return
     try {
       await deleteRole.mutateAsync(deleteId)
-      toast.success('Role deleted successfully')
+      notify.success('Role deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete role')
+    } catch (error) {
+      notify.apiError(error, 'Role could not be deleted', {
+        fallback: 'The role could not be deleted.',
+      })
     }
   }
 

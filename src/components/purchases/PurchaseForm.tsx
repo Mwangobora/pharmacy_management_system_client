@@ -5,7 +5,6 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -15,6 +14,7 @@ import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCreatePurchase, useUpdatePurchase } from '@/hooks/mutations/usePurchases'
+import { notify } from '@/lib/notify'
 import type { Purchase } from '@/types/suppliers'
 import { getPurchaseUnits, getUnitConversion, getUnitPriceFromBase } from '@/components/sales/pos/utils'
 
@@ -103,7 +103,9 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
 
   const onSubmit = async (data: FormData) => {
     if (!isEditing && (!data.items || data.items.length === 0)) {
-      toast.error('Add at least one item')
+      notify.warning('Add at least one purchase item', {
+        description: 'Purchase receiving needs at least one medicine line before it can be saved.',
+      })
       return
     }
 
@@ -117,7 +119,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
             notes: data.notes || undefined,
           },
         })
-        toast.success('Purchase updated successfully')
+        notify.success('Purchase updated successfully')
       } else {
         await createPurchase.mutateAsync({
           supplier: data.supplier,
@@ -134,11 +136,18 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
             manufacture_date: item.manufacture_date || undefined,
           })),
         })
-        toast.success('Purchase created successfully')
+        notify.success('Purchase received successfully', {
+          description: 'Batch stock, expiry, and cost details were recorded.',
+        })
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update purchase' : 'Failed to create purchase')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Purchase could not be updated' : 'Purchase receiving failed', {
+        fallback: isEditing
+          ? 'The purchase changes could not be saved.'
+          : 'The purchase was not fully received. Please review batch and stock details.',
+        persistent: !isEditing,
+      })
     }
   }
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -14,6 +13,7 @@ import { SupplierForm } from '@/components/suppliers/SupplierForm'
 import { SupplierDetail } from '@/components/suppliers/SupplierDetail'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useDeleteSupplier } from '@/hooks/mutations/useSuppliers'
+import { notify } from '@/lib/notify'
 import type { Supplier } from '@/types/suppliers'
 
 export default function SuppliersPage() {
@@ -41,10 +41,12 @@ export default function SuppliersPage() {
     if (!deleteId) return
     try {
       await deleteSupplier.mutateAsync(deleteId)
-      toast.success('Supplier deleted successfully')
+      notify.success('Supplier deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete supplier')
+    } catch (error) {
+      notify.apiError(error, 'Supplier could not be deleted', {
+        fallback: 'The supplier record could not be deleted.',
+      })
     }
   }
 

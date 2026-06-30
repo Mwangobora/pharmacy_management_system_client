@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -14,6 +13,7 @@ import { PurchaseForm } from '@/components/purchases/PurchaseForm'
 import { PurchaseDetail } from '@/components/purchases/PurchaseDetail'
 import { usePurchases } from '@/hooks/queries/usePurchases'
 import { useDeletePurchase } from '@/hooks/mutations/usePurchases'
+import { notify } from '@/lib/notify'
 import type { Purchase } from '@/types/suppliers'
 import { formatTzsCurrency } from '@/lib/currency'
 
@@ -42,10 +42,12 @@ export default function PurchasesPage() {
     if (!deleteId) return
     try {
       await deletePurchase.mutateAsync(deleteId)
-      toast.success('Purchase deleted successfully')
+      notify.success('Purchase deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete purchase')
+    } catch (error) {
+      notify.apiError(error, 'Purchase could not be deleted', {
+        fallback: 'The purchase record could not be deleted.',
+      })
     }
   }
 

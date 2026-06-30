@@ -5,7 +5,6 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -14,6 +13,7 @@ import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/compon
 import { useCreateUser, useUpdateUser } from '@/hooks/mutations/useUsers'
 import { usePermissions } from '@/hooks/queries/usePermissions'
 import { useRoles } from '@/hooks/queries/useRoles'
+import { notify } from '@/lib/notify'
 import type { User } from '@/types/auth'
 
 const schema = z.object({
@@ -108,15 +108,23 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
 
       if (isEditing) {
         await updateUser.mutateAsync({ id: user.id, payload })
-        toast.success('User updated successfully')
+        notify.success('User updated successfully')
       } else {
-        if (!data.password) return toast.error('Password is required')
+        if (!data.password) {
+          return notify.warning('Password is required', {
+            description: 'Enter a password before creating a new user account.',
+          })
+        }
         await createUser.mutateAsync({ ...payload, password: data.password })
-        toast.success('User created successfully')
+        notify.success('User created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update user' : 'Failed to create user')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'User could not be updated' : 'User could not be created', {
+        fallback: isEditing
+          ? 'The staff account changes could not be saved.'
+          : 'The staff account could not be created.',
+      })
     }
   }
 

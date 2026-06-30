@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye, Upload } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -16,6 +15,7 @@ import type { Category } from '@/types/inventory'
 import { CategoryForm } from '@/components/categories/CategoryForm'
 import { CategoryDetail } from '@/components/categories/CategoryDetail'
 import { CategoryBulkForm } from '@/components/categories/CategoryBulkForm'
+import { notify } from '@/lib/notify'
 
 export default function CategoriesPage() {
   const [search, setSearch] = useState('')
@@ -42,10 +42,12 @@ export default function CategoriesPage() {
     if (!deleteId) return
     try {
       await deleteCategory.mutateAsync(deleteId)
-      toast.success('Category deleted successfully')
+      notify.success('Category deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete category')
+    } catch (error) {
+      notify.apiError(error, 'Category could not be deleted', {
+        fallback: 'The category could not be deleted.',
+      })
     }
   }
 

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -13,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateSupplier, useUpdateSupplier } from '@/hooks/mutations/useSuppliers'
+import { notify } from '@/lib/notify'
 import type { Supplier } from '@/types/suppliers'
 
 const schema = z.object({
@@ -100,7 +100,7 @@ export function SupplierForm({ open, onOpenChange, supplier }: SupplierFormProps
             is_active: data.is_active,
           },
         })
-        toast.success('Supplier updated successfully')
+        notify.success('Supplier updated successfully')
       } else {
         await createSupplier.mutateAsync({
           name: data.name,
@@ -111,11 +111,15 @@ export function SupplierForm({ open, onOpenChange, supplier }: SupplierFormProps
           tax_id: data.tax_id,
           is_active: data.is_active,
         })
-        toast.success('Supplier created successfully')
+        notify.success('Supplier created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update supplier' : 'Failed to create supplier')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Supplier could not be updated' : 'Supplier could not be created', {
+        fallback: isEditing
+          ? 'The supplier changes could not be saved.'
+          : 'The supplier could not be created.',
+      })
     }
   }
 

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -13,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateCategory, useUpdateCategory } from '@/hooks/mutations/useCategories'
+import { notify } from '@/lib/notify'
 import type { Category } from '@/types/inventory'
 
 const schema = z.object({
@@ -75,7 +75,7 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
             is_active: data.is_active,
           },
         })
-        toast.success('Category updated successfully')
+        notify.success('Category updated successfully')
       } else {
         await createCategory.mutateAsync({
           name: data.name,
@@ -83,11 +83,15 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
           display_order: Number(data.display_order),
           is_active: data.is_active,
         })
-        toast.success('Category created successfully')
+        notify.success('Category created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update category' : 'Failed to create category')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Category could not be updated' : 'Category could not be created', {
+        fallback: isEditing
+          ? 'The category changes could not be saved.'
+          : 'The category could not be created.',
+      })
     }
   }
 

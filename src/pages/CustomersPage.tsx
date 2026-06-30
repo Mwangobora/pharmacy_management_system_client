@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -14,6 +13,7 @@ import { CustomerForm } from '@/components/customers/CustomerForm'
 import { CustomerDetail } from '@/components/customers/CustomerDetail'
 import { useCustomers } from '@/hooks/queries/useCustomers'
 import { useDeleteCustomer } from '@/hooks/mutations/useCustomers'
+import { notify } from '@/lib/notify'
 import type { Customer } from '@/types/sales'
 
 export default function CustomersPage() {
@@ -41,10 +41,12 @@ export default function CustomersPage() {
     if (!deleteId) return
     try {
       await deleteCustomer.mutateAsync(deleteId)
-      toast.success('Customer deleted successfully')
+      notify.success('Customer deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete customer')
+    } catch (error) {
+      notify.apiError(error, 'Customer could not be deleted', {
+        fallback: 'The customer record could not be deleted.',
+      })
     }
   }
 

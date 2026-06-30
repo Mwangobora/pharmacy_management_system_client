@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -14,6 +13,7 @@ import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/compon
 import { Label } from '@/components/ui/label'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateCustomer, useUpdateCustomer } from '@/hooks/mutations/useCustomers'
+import { notify } from '@/lib/notify'
 import type { Customer } from '@/types/sales'
 
 const schema = z.object({
@@ -105,14 +105,18 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
     try {
       if (isEditing) {
         await updateCustomer.mutateAsync({ id: customer.id, payload })
-        toast.success('Customer updated successfully')
+        notify.success('Customer updated successfully')
       } else {
         await createCustomer.mutateAsync(payload)
-        toast.success('Customer created successfully')
+        notify.success('Customer created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update customer' : 'Failed to create customer')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Customer could not be updated' : 'Customer could not be created', {
+        fallback: isEditing
+          ? 'The customer changes could not be saved.'
+          : 'The customer record could not be created.',
+      })
     }
   }
 

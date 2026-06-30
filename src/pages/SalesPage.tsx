@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,6 +13,7 @@ import { SaleForm } from '@/components/sales/SaleForm'
 import { SaleDetail } from '@/components/sales/SaleDetail'
 import { useSales } from '@/hooks/queries/useSales'
 import { useDeleteSale } from '@/hooks/mutations/useSales'
+import { notify } from '@/lib/notify'
 import type { Sale } from '@/types/sales'
 import { formatTzsCurrency } from '@/lib/currency'
 
@@ -42,10 +42,12 @@ export default function SalesPage() {
     if (!deleteId) return
     try {
       await deleteSale.mutateAsync(deleteId)
-      toast.success('Sale deleted successfully')
+      notify.success('Sale deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete sale')
+    } catch (error) {
+      notify.apiError(error, 'Sale could not be deleted', {
+        fallback: 'The sale record could not be deleted.',
+      })
     }
   }
 

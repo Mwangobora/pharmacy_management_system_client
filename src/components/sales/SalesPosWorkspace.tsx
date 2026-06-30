@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import { ErrorState } from '@/components/ErrorState'
 import { useCreateSale } from '@/hooks/mutations/useSales'
 import { useCustomers } from '@/hooks/queries/useCustomers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
+import { notify } from '@/lib/notify'
 import { useAuthStore } from '@/store/authStore'
 import type { Medicine } from '@/types/inventory'
 import type { PaymentMethod } from '@/types/sales'
@@ -132,7 +132,11 @@ export function SalesPosWorkspace() {
   }
 
   const handleSubmitSale = async () => {
-    if (cartItems.length === 0) return toast.error('Add at least one medicine to the cart')
+    if (cartItems.length === 0) {
+      return notify.warning('Cart is empty', {
+        description: 'Add at least one medicine to the cart before checkout.',
+      })
+    }
     const prescriptionItems = cartItems.map((item) => item.medicine).filter((medicine) => medicine.requires_prescription)
 
     try {
@@ -148,10 +152,15 @@ export function SalesPosWorkspace() {
           batch_number: item.medicine.batch_number || undefined,
         })),
       })
-      toast.success('Sale completed successfully')
+      notify.success('Sale completed successfully', {
+        description: 'Payment was recorded and stock quantities were updated successfully.',
+      })
       resetSale()
-    } catch {
-      toast.error('Failed to complete sale')
+    } catch (error) {
+      notify.apiError(error, 'Sale could not be completed', {
+        fallback: 'Sale could not be completed because batch stock or payment details changed.',
+        persistent: true,
+      })
     }
   }
 

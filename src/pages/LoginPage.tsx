@@ -7,12 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Pill } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormFieldWrapper } from '@/components/forms/FormPrimitives'
 import { useAuthStore } from '@/store/authStore'
 import { AuthApi } from '@/api/AuthApi'
+import { notify } from '@/lib/notify'
 import { ROUTES } from '@/routes/paths'
 
 const loginSchema = z.object({
@@ -54,10 +54,14 @@ export default function LoginPage() {
         login(fetchedUser, tokens)
       }
 
-      toast.success('Login successful')
+      notify.success('Login successful', {
+        description: 'Your pharmacy workspace is ready.',
+      })
       navigate(from, { replace: true })
-    } catch {
-      toast.error('Invalid credentials')
+    } catch (error) {
+      notify.apiError(error, 'Sign-in failed', {
+        fallback: 'Email or password is incorrect.',
+      })
     } finally {
       setIsLoading(false)
     }

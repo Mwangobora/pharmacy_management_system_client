@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { useBulkCreateCategories } from '@/hooks/mutations/useCategories'
+import { notify } from '@/lib/notify'
 import type { CategoryCreatePayload } from '@/types/inventory'
 
 interface CategoryBulkFormProps {
@@ -36,16 +36,20 @@ export function CategoryBulkForm({ open, onOpenChange }: CategoryBulkFormProps) 
 
   const handleSubmit = async () => {
     if (!parsed.data) {
-      toast.error(parsed.error || 'Paste valid JSON data')
+      notify.warning('Bulk category JSON needs attention', {
+        description: parsed.error || 'Paste a valid JSON payload before uploading.',
+      })
       return
     }
     try {
       await bulkCreate.mutateAsync(parsed.data)
-      toast.success('Categories added successfully')
+      notify.success('Categories added successfully')
       setRaw('')
       onOpenChange(false)
-    } catch {
-      toast.error('Failed to add categories')
+    } catch (error) {
+      notify.apiError(error, 'Categories could not be uploaded', {
+        fallback: 'The category JSON could not be saved.',
+      })
     }
   }
 

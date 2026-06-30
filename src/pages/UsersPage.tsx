@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/PageHeader'
@@ -18,6 +17,7 @@ import { UserDetail } from '@/components/users/UserDetail'
 import { useRoles } from '@/hooks/queries/useRoles'
 import { useUsers } from '@/hooks/queries/useUsers'
 import { useDeleteUser } from '@/hooks/mutations/useUsers'
+import { notify } from '@/lib/notify'
 import type { RoleDetail as Role, User } from '@/types/auth'
 
 export default function UsersPage() {
@@ -64,10 +64,12 @@ export default function UsersPage() {
     if (!deleteId) return
     try {
       await deleteUser.mutateAsync(deleteId)
-      toast.success('User deleted successfully')
+      notify.success('User deleted successfully')
       setDeleteId(null)
-    } catch {
-      toast.error('Failed to delete user')
+    } catch (error) {
+      notify.apiError(error, 'User could not be deleted', {
+        fallback: 'The staff account could not be deleted.',
+      })
     }
   }
 

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -14,6 +13,7 @@ import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/compon
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateRole, useUpdateRole } from '@/hooks/mutations/useRoles'
 import { usePermissions } from '@/hooks/queries/usePermissions'
+import { notify } from '@/lib/notify'
 import type { RoleDetail } from '@/types/auth'
 
 const schema = z.object({
@@ -87,14 +87,18 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
     try {
       if (isEditing) {
         await updateRole.mutateAsync({ id: role.id, payload: data })
-        toast.success('Role updated successfully')
+        notify.success('Role updated successfully')
       } else {
         await createRole.mutateAsync({ ...data, permissions: data.permissions ?? [] })
-        toast.success('Role created successfully')
+        notify.success('Role created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update role' : 'Failed to create role')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Role could not be updated' : 'Role could not be created', {
+        fallback: isEditing
+          ? 'The role changes could not be saved.'
+          : 'The role could not be created.',
+      })
     }
   }
 

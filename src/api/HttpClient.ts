@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/authStore'
+import { notify } from '@/lib/notify'
 import { ENDPOINTS } from './endpoints'
 
 export interface ApiError {
@@ -14,6 +15,7 @@ export function unwrapList<T>(data: T[] | { results?: T[] }): T[] {
 
 class HttpClient {
   private baseUrl: string
+  private hasShownSessionExpired = false
 
   constructor() {
     this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://0.0.0.0:8000'
@@ -29,6 +31,14 @@ class HttpClient {
       if (response.status === 401) {
         const refreshed = await this.refreshToken()
         if (!refreshed) {
+          if (!this.hasShownSessionExpired) {
+            notify.error('Session expired', {
+              id: 'session-expired',
+              description: 'Your session has ended. Please sign in again to continue working.',
+              persistent: true,
+            })
+            this.hasShownSessionExpired = true
+          }
           useAuthStore.getState().logout()
           window.location.href = '/login'
         }
@@ -57,6 +67,7 @@ class HttpClient {
       if (!response.ok) return false
       const data = await response.json()
       useAuthStore.getState().updateAccessToken(data.access)
+      this.hasShownSessionExpired = false
       return true
     } catch {
       return false

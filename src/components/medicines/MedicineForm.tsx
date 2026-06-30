@@ -5,7 +5,6 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -14,6 +13,7 @@ import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCategories } from '@/hooks/queries/useCategories'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
 import { useCreateMedicine, useUpdateMedicine } from '@/hooks/mutations/useMedicines'
+import { notify } from '@/lib/notify'
 import type { Medicine, MedicineCreatePayload, MedicineUnit, MedicineUnitConversionPayload } from '@/types/inventory'
 
 const DOSAGE_FORMS = [
@@ -212,14 +212,20 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
     try {
       if (isEditing && medicine) {
         await updateMedicine.mutateAsync({ id: medicine.id, payload })
-        toast.success('Medicine updated successfully')
+        notify.success('Medicine updated successfully')
       } else {
         await createMedicine.mutateAsync(payload)
-        toast.success('Medicine created successfully')
+        notify.success('Medicine created successfully', {
+          description: 'You can receive batch stock for this medicine during purchase receiving.',
+        })
       }
       onOpenChange(false)
-    } catch {
-      toast.error('Failed to save medicine')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Medicine could not be updated' : 'Medicine could not be created', {
+        fallback: isEditing
+          ? 'The medicine changes could not be saved.'
+          : 'The medicine could not be created.',
+      })
     }
   }
 

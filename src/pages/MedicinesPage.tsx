@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Plus, Edit, Trash2, Eye, AlertTriangle } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -14,6 +13,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { useMedicines } from '@/hooks/queries/useMedicines'
 import { useCategories } from '@/hooks/queries/useCategories'
 import { useDeleteMedicine } from '@/hooks/mutations/useMedicines'
+import { notify } from '@/lib/notify'
 import type { Medicine } from '@/types/inventory'
 import { MedicineForm } from '@/components/medicines/MedicineForm'
 import { MedicineDetail } from '@/components/medicines/MedicineDetail'
@@ -42,7 +42,15 @@ export default function MedicinesPage() {
   const handleView = (medicine: Medicine) => { setSelectedMedicine(medicine); setDetailOpen(true) }
   const handleDelete = async () => {
     if (!deleteId) return
-    try { await deleteMedicine.mutateAsync(deleteId); toast.success('Medicine deleted'); setDeleteId(null) } catch { toast.error('Failed to delete') }
+    try {
+      await deleteMedicine.mutateAsync(deleteId)
+      notify.success('Medicine deleted successfully')
+      setDeleteId(null)
+    } catch (error) {
+      notify.apiError(error, 'Medicine could not be deleted', {
+        fallback: 'The medicine record could not be deleted.',
+      })
+    }
   }
 
   const getStockBadge = (medicine: Medicine) => {

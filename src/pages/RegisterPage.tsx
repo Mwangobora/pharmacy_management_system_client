@@ -7,12 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, Pill } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormFieldWrapper } from '@/components/forms/FormPrimitives'
 import { AuthApi } from '@/api/AuthApi'
+import { notify } from '@/lib/notify'
 import { ROUTES } from '@/routes/paths'
 
 const registerSchema = z
@@ -51,10 +51,14 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       })
-      toast.success('Account created successfully! Please sign in.')
+      notify.success('Account created successfully', {
+        description: 'You can sign in now using your new credentials.',
+      })
       navigate(ROUTES.LOGIN)
-    } catch {
-      toast.error('Registration failed. Please try again.')
+    } catch (error) {
+      notify.apiError(error, 'Registration failed', {
+        fallback: 'Your account could not be created. Please review the details and try again.',
+      })
     } finally {
       setIsLoading(false)
     }

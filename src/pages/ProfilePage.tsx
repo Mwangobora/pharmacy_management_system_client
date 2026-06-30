@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2, UserCircle } from 'lucide-react'
-import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +14,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useProfile } from '@/hooks/queries/useProfile'
 import { useChangePassword, useUpdateProfile } from '@/hooks/mutations/useProfile'
 import { useAuthStore } from '@/store/authStore'
+import { notify } from '@/lib/notify'
 
 const profileSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -66,19 +66,24 @@ export default function ProfilePage() {
     try {
       const updated = await updateProfile.mutateAsync(data)
       setUser(updated)
-      toast.success('Profile updated')
-    } catch {
-      toast.error('Failed to update profile')
+      notify.success('Profile updated successfully')
+    } catch (error) {
+      notify.apiError(error, 'Profile could not be updated', {
+        fallback: 'Your profile changes could not be saved.',
+      })
     }
   }
 
   const onSubmitPassword = async (data: PasswordFormData) => {
     try {
       await changePassword.mutateAsync(data)
-      toast.success('Password updated')
+      notify.success('Password updated successfully')
       resetPassword()
-    } catch {
-      toast.error('Failed to update password')
+    } catch (error) {
+      notify.apiError(error, 'Password could not be updated', {
+        fallback: 'Your password could not be changed.',
+        persistent: true,
+      })
     }
   }
 

@@ -5,12 +5,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreatePermission, useUpdatePermission } from '@/hooks/mutations/usePermissions'
+import { notify } from '@/lib/notify'
 import type { PermissionDetail } from '@/types/auth'
 
 const schema = z.object({
@@ -72,18 +72,22 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
             content_type: Number(data.content_type),
           },
         })
-        toast.success('Permission updated successfully')
+        notify.success('Permission updated successfully')
       } else {
         await createPermission.mutateAsync({
           name: data.name,
           codename: data.codename,
           content_type: Number(data.content_type),
         })
-        toast.success('Permission created successfully')
+        notify.success('Permission created successfully')
       }
       onOpenChange(false)
-    } catch {
-      toast.error(isEditing ? 'Failed to update permission' : 'Failed to create permission')
+    } catch (error) {
+      notify.apiError(error, isEditing ? 'Permission could not be updated' : 'Permission could not be created', {
+        fallback: isEditing
+          ? 'The permission changes could not be saved.'
+          : 'The permission could not be created.',
+      })
     }
   }
 

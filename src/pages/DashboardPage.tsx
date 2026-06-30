@@ -1,5 +1,4 @@
 import { startTransition, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DashboardEmptyState } from '@/components/dashboard/DashboardEmptyState'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
@@ -13,6 +12,7 @@ import { SalesDashboard } from '@/components/dashboard/tabs/SalesDashboard'
 import { useDashboardFiltersOptions } from '@/hooks/queries/useDashboard'
 import { useDashboardFilters } from '@/hooks/dashboard/useDashboardFilters'
 import { usePermissions } from '@/hooks/usePermissions'
+import { notify } from '@/lib/notify'
 import type { DashboardPreset } from '@/types/dashboard'
 
 const dashboardTabs = [
@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
   const refreshDashboard = async () => {
     await refetch()
-    toast.success('Dashboard refreshed successfully', {
+    notify.info('Dashboard data refreshed', {
       description: 'Latest pharmacy data has been loaded.',
     })
   }
