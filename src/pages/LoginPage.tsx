@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {  useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to your enterprise account to continue
+              Sign in to your account to continue
             </p>
           </div>
 
@@ -124,13 +124,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          <div className="text-center lg:text-left text-sm text-muted-foreground">
-            {"Don't have an account? "}
-            <Link to={ROUTES.REGISTER} className="text-primary font-medium hover:underline underline-offset-4">
-              Request access
-            </Link>
-          </div>
         </motion.div>
       </div>
     </div>
