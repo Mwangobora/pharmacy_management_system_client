@@ -171,9 +171,9 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
       title={isEditing ? 'Edit Sale' : 'New Sale'}
       description="Fast checkout form"
       dialogContentClassName="sm:max-w-5xl"
-      desktopScrollable={false}
+      desktopScrollable
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-4">
         <FormLayout className="max-w-none">
           <FormSection title="Sale Details">
             <div className="grid gap-4 md:grid-cols-2">
@@ -220,19 +220,36 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
           </FormSection>
 
           {!isEditing && (
-          <FormSection title="Items" description="Select the selling unit and quantity. The form shows the conversion, available quantity, and price before checkout.">
-              <div className="flex items-center justify-between">
+            <FormSection title="Items" description="Select the selling unit and quantity. The form shows the conversion, available quantity, and price before checkout.">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-muted-foreground">Subtotal preview: {formatTzsCurrency(totalsPreview)}</p>
-                <Button type="button" variant="outline" size="sm" onClick={() => append({ medicine: '', quantity: 1, unit_name: '' })}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={() => append({ medicine: '', quantity: 1, unit_name: '' })}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
                 </Button>
               </div>
 
               {fields.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
-                  No items added yet.
-                </p>
+                <div className="rounded-lg border border-dashed border-border px-3 py-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No items added yet.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4 w-full sm:w-auto"
+                    onClick={() => append({ medicine: '', quantity: 1, unit_name: '' })}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add First Item
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {fields.map((field, index) => {
@@ -248,8 +265,8 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
 
                     return (
                       <div key={field.id} className="rounded-lg border border-border/60 p-3">
-                        <div className="grid gap-3 md:grid-cols-7">
-                          <FormFieldWrapper label="Medicine" className="md:col-span-3" error={errors.items?.[index]?.medicine?.message}>
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                          <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message}>
                             <Select
                               value={selectedMedicineId || ''}
                               onValueChange={(value) => {
@@ -299,7 +316,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                             <Input value={unitPrice ? formatTzsCurrency(unitPrice) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Line Total">
+                          <FormFieldWrapper label="Line Total" className="sm:col-span-2 xl:col-span-1">
                             <Input value={lineTotal ? formatTzsCurrency(lineTotal) : ''} readOnly disabled placeholder="Auto" />
                           </FormFieldWrapper>
                         </div>
@@ -334,6 +351,20 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                   })}
                 </div>
               )}
+
+              {fields.length > 0 ? (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={() => append({ medicine: '', quantity: 1, unit_name: '' })}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Another Item
+                  </Button>
+                </div>
+              ) : null}
             </FormSection>
           )}
 

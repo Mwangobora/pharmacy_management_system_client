@@ -12,3 +12,10 @@ export function formatDate(value: string | null | undefined, fallback = 'Not ava
   return date ? format(date, 'PPP') : fallback
 }
 
+export function formatDateTime(
+  value: string | null | undefined,
+  fallback = 'Not available',
+): string {
+  const date = parseDateValue(value)
+  return date ? format(date, 'PPP p') : fallback
+}

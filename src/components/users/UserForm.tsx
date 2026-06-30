@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
+import { SearchableSelectionField } from '@/components/forms/SearchableSelectionField'
 import { useCreateUser, useUpdateUser } from '@/hooks/mutations/useUsers'
 import { usePermissions } from '@/hooks/queries/usePermissions'
 import { useRoles } from '@/hooks/queries/useRoles'
@@ -30,40 +30,6 @@ interface UserFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user?: User | null
-}
-
-function ToggleList({
-  items,
-  selected,
-  onToggle,
-  title,
-}: {
-  items: Array<{ id: number; label: string; hint?: string }>
-  selected: number[]
-  onToggle: (id: number) => void
-  title?: string
-}) {
-  return (
-    <div className="space-y-3 rounded-lg border border-border/60 p-3">
-      {title && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">{title}</p>
-          <span className="text-xs text-muted-foreground">{selected.length} selected</span>
-        </div>
-      )}
-      <div className="max-h-52 space-y-2 overflow-auto">
-      {items.map((item) => (
-        <label key={item.id} className="flex items-start gap-2 rounded-md px-1 py-1.5 text-sm hover:bg-muted/50">
-          <Checkbox checked={selected.includes(item.id)} onCheckedChange={() => onToggle(item.id)} className="mt-0.5" />
-          <span>
-            <span className="block font-medium text-foreground">{item.label}</span>
-            {item.hint && <span className="block text-xs text-muted-foreground">{item.hint}</span>}
-          </span>
-        </label>
-      ))}
-      </div>
-    </div>
-  )
 }
 
 export function UserForm({ open, onOpenChange, user }: UserFormProps) {
@@ -90,6 +56,33 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
 
   const selectedRoles = useWatch({ control, name: 'roles' }) || []
   const selectedPermissions = useWatch({ control, name: 'direct_permissions' }) || []
+  const roleItems = useMemo(
+    () => roles.map((role) => ({
+      id: role.id,
+      label: role.name,
+      hint: role.code,
+      description: role.description,
+      searchText: [role.name, role.code, role.description].filter(Boolean).join(' '),
+    })),
+    [roles],
+  )
+  const permissionItems = useMemo(
+    () => permissions.map((permission) => ({
+      id: permission.id,
+      label: permission.name,
+      hint: permission.codename,
+      description: permission.description,
+      searchText: [
+        permission.name,
+        permission.codename,
+        permission.module,
+        permission.resource,
+        permission.action,
+        permission.description,
+      ].filter(Boolean).join(' '),
+    })),
+    [permissions],
+  )
 
   const toggle = (field: 'roles' | 'direct_permissions', id: number) => {
     const current = getValues(field) || []
@@ -151,20 +144,26 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
           </FormSection>
 
           <FormSection title="Role Assignments">
-            <ToggleList
+            <SearchableSelectionField
               title="Assign one or more roles"
-              items={roles.map((role) => ({ id: role.id, label: role.name, hint: role.code }))}
+              items={roleItems}
               selected={selectedRoles}
               onToggle={(id) => toggle('roles', id)}
+              searchPlaceholder="Search roles..."
+              emptyMessage="No roles available."
+              noResultsMessage="No roles match your search."
             />
           </FormSection>
 
           <FormSection title="Direct Permissions" description="Use sparingly for exception-based access overrides.">
-            <ToggleList
+            <SearchableSelectionField
               title="Optional direct permissions"
-              items={permissions.map((permission) => ({ id: permission.id, label: permission.name, hint: permission.codename }))}
+              items={permissionItems}
               selected={selectedPermissions}
               onToggle={(id) => toggle('direct_permissions', id)}
+              searchPlaceholder="Search permissions..."
+              emptyMessage="No permissions available."
+              noResultsMessage="No permissions match your search."
             />
           </FormSection>
 

@@ -23,3 +23,11 @@ export function useUser(id: string) {
     enabled: !!id,
   })
 }
+
+export function useUserAccess(id: string) {
+  return useQuery({
+    queryKey: [...userKeys.detail(id), 'access'],
+    queryFn: ({ signal }) => UsersApi.getAccess(id, signal),
+    enabled: !!id,
+  })
+}

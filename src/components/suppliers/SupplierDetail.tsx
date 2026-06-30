@@ -1,6 +1,6 @@
-import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
+import { formatDate } from '@/lib/date'
 import type { Supplier } from '@/types/suppliers'
 
 interface SupplierDetailProps {
@@ -64,11 +64,11 @@ export function SupplierDetail({ open, onOpenChange, supplier }: SupplierDetailP
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Created</p>
-            <p>{format(new Date(supplier.created_at), 'PPP')}</p>
+            <p>{formatDate(supplier.created_at)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Updated</p>
-            <p>{format(new Date(supplier.updated_at), 'PPP')}</p>
+            <p>{formatDate(supplier.updated_at)}</p>
           </div>
         </div>
       </div>

@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
+import { SearchableSelectionField } from '@/components/forms/SearchableSelectionField'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCreateRole, useUpdateRole } from '@/hooks/mutations/useRoles'
 import { usePermissions } from '@/hooks/queries/usePermissions'
@@ -75,6 +75,23 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
   }, [role, reset])
 
   const selectedPermissions = watch('permissions') || []
+  const permissionItems = useMemo(
+    () => safePermissions.map((permission) => ({
+      id: permission.id,
+      label: permission.name,
+      hint: permission.codename,
+      description: permission.description,
+      searchText: [
+        permission.name,
+        permission.codename,
+        permission.module,
+        permission.resource,
+        permission.action,
+        permission.description,
+      ].filter(Boolean).join(' '),
+    })),
+    [safePermissions],
+  )
 
   const togglePermission = (permissionId: number) => {
     const next = selectedPermissions.includes(permissionId)
@@ -134,30 +151,20 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
             </div>
           </FormSection>
 
-          <FormSection title="Permissions" description="Select access rights for this role.">
+          <FormSection title="Permissions" description="Search, assign, and remove access rights for this role.">
             <FormFieldWrapper
               label="Permission List"
-              helperText="Use only required permissions to keep access minimal."
+              helperText="Use only the permissions this staff role truly needs."
             >
-              <div className="max-h-56 space-y-2 overflow-auto rounded-lg border border-border/60 p-3">
-                {safePermissions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No permissions available.</p>
-                ) : (
-                  safePermissions.map((permission) => (
-                    <label key={permission.id} className="flex items-start gap-2 rounded-md px-1 py-1.5 text-sm hover:bg-muted/50">
-                      <Checkbox
-                        checked={selectedPermissions.includes(permission.id)}
-                        onCheckedChange={() => togglePermission(permission.id)}
-                        className="mt-0.5"
-                      />
-                      <span className="min-w-0">
-                        <span className="block font-medium text-foreground">{permission.name}</span>
-                        <span className="block text-xs text-muted-foreground">{permission.codename}</span>
-                      </span>
-                    </label>
-                  ))
-                )}
-              </div>
+              <SearchableSelectionField
+                items={permissionItems}
+                selected={selectedPermissions}
+                onToggle={togglePermission}
+                title="Permission list"
+                searchPlaceholder="Search permissions..."
+                emptyMessage="No permissions available."
+                noResultsMessage="No permissions match your search."
+              />
             </FormFieldWrapper>
           </FormSection>
 

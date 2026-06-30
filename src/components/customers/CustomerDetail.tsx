@@ -1,8 +1,8 @@
-import { format } from 'date-fns'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCustomerLoyaltySummary, useCustomerPurchaseHistory } from '@/hooks/queries/useCustomers'
 import type { Customer, CustomerLoyaltySummary, Sale } from '@/types/sales'
 import { formatTzsCurrency } from '@/lib/currency'
+import { formatDate, parseDateValue } from '@/lib/date'
 
 interface CustomerDetailProps {
   open: boolean
@@ -11,11 +11,17 @@ interface CustomerDetailProps {
 }
 
 export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailProps) {
+  const customerId = customer?.id || ''
+  const { data: loyaltySummary } = useCustomerLoyaltySummary(customerId)
+  const { data: purchaseHistory = [] } = useCustomerPurchaseHistory(customerId)
+
   if (!customer) return null
-  const { data: loyaltySummary } = useCustomerLoyaltySummary(customer.id)
-  const { data: purchaseHistory = [] } = useCustomerPurchaseHistory(customer.id)
+
   const safeHistory = Array.isArray(purchaseHistory) ? purchaseHistory : []
   const summary = loyaltySummary as CustomerLoyaltySummary | undefined
+  const birthDate = parseDateValue(customer.date_of_birth)
+  const createdAtLabel = formatDate(customer.created_at)
+  const lastPurchaseLabel = formatDate(summary?.last_purchase_date, '-')
 
   return (
     <ResponsiveModal open={open} onOpenChange={onOpenChange} title="Customer Details">
@@ -48,8 +54,8 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
           <div>
             <p className="text-sm text-muted-foreground">Age</p>
             <p>
-              {customer.date_of_birth
-                ? Math.max(0, new Date().getFullYear() - new Date(customer.date_of_birth).getFullYear())
+              {birthDate
+                ? Math.max(0, new Date().getFullYear() - birthDate.getFullYear())
                 : '-'}
             </p>
           </div>
@@ -75,7 +81,7 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Last Purchase</p>
-            <p>{summary?.last_purchase_date ? format(new Date(summary.last_purchase_date), 'PPP') : '-'}</p>
+            <p>{lastPurchaseLabel}</p>
           </div>
         </div>
         <div>
@@ -95,7 +101,7 @@ export function CustomerDetail({ open, onOpenChange, customer }: CustomerDetailP
         </div>
         <div>
           <p className="text-sm text-muted-foreground">Created</p>
-          <p>{format(new Date(customer.created_at), 'PPP')}</p>
+          <p>{createdAtLabel}</p>
         </div>
       </div>
     </ResponsiveModal>
