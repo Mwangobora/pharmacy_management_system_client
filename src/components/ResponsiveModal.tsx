@@ -25,6 +25,8 @@ interface ResponsiveModalProps {
   title: string
   description?: string
   children: ReactNode
+  /** Action buttons pinned below the scrollable content (e.g. Edit / Delete / Close). */
+  footer?: ReactNode
   dialogContentClassName?: string
   desktopScrollable?: boolean
   mobileScrollable?: boolean
@@ -36,6 +38,7 @@ export function ResponsiveModal({
   title,
   description,
   children,
+  footer,
   dialogContentClassName,
   desktopScrollable = true,
   mobileScrollable = true,
@@ -57,6 +60,11 @@ export function ResponsiveModal({
           ) : (
             <div className="px-4 pb-4">{children}</div>
           )}
+          {footer && (
+            <div className="flex flex-col gap-2 border-t border-border/60 px-4 py-3 sm:flex-row sm:justify-end">
+              {footer}
+            </div>
+          )}
         </DrawerContent>
       </Drawer>
     )
@@ -66,19 +74,31 @@ export function ResponsiveModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          desktopScrollable && 'max-h-[90vh] overflow-hidden',
+          desktopScrollable && 'flex max-h-[90vh] flex-col overflow-hidden',
           !desktopScrollable && 'overflow-visible',
           dialogContentClassName,
         )}
       >
-        <DialogHeader>
+        <DialogHeader className={desktopScrollable ? 'shrink-0' : undefined}>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {desktopScrollable ? (
-          <ScrollArea className="max-h-[calc(90vh-120px)]">{children}</ScrollArea>
+          // Plain overflow-y-auto, not the Radix ScrollArea component: Radix's
+          // viewport sizes itself with height:100%, which never resolves inside
+          // a flex-col dialog that only has max-height (not a definite height) -
+          // the percentage collapses to content size and the dialog's own
+          // overflow-hidden hard-clips it instead of scrolling. A flex item's
+          // *own* box (this div, via min-h-0 + flex-1) does get a genuinely
+          // definite height from the flex algorithm, so native overflow works.
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         ) : (
           <div>{children}</div>
+        )}
+        {footer && (
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
+            {footer}
+          </div>
         )}
       </DialogContent>
     </Dialog>

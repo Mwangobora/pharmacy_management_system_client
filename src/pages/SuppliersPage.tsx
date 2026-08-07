@@ -109,7 +109,13 @@ export default function SuppliersPage() {
       />
 
       <SupplierForm open={formOpen} onOpenChange={setFormOpen} supplier={selectedSupplier} />
-      <SupplierDetail open={detailOpen} onOpenChange={setDetailOpen} supplier={selectedSupplier} />
+      <SupplierDetail
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        supplier={selectedSupplier}
+        onEdit={handleEdit}
+        onDelete={(item) => setDeleteId(item.id)}
+      />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}

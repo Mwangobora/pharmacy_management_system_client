@@ -114,7 +114,13 @@ export default function CategoriesPage() {
 
       <CategoryForm open={formOpen} onOpenChange={setFormOpen} category={selectedCategory} />
       <CategoryBulkForm open={bulkOpen} onOpenChange={setBulkOpen} />
-      <CategoryDetail open={detailOpen} onOpenChange={setDetailOpen} category={selectedCategory} />
+      <CategoryDetail
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        category={selectedCategory}
+        onEdit={handleEdit}
+        onDelete={(item) => setDeleteId(item.id)}
+      />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}

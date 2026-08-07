@@ -1,13 +1,14 @@
-import { AlertTriangle, CalendarClock, ClipboardList, MapPin, Pill, Warehouse } from 'lucide-react'
+import { AlertTriangle, BadgeDollarSign, Box, CalendarClock, ClipboardList, MapPin, PackageCheck, Pill, Warehouse } from 'lucide-react'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { Card, CardContent } from '@/components/ui/card'
+import { DetailHero } from '@/components/detail/DetailHero'
+import { DetailInfoCard } from '@/components/detail/DetailInfoCard'
+import { DetailQuickRow } from '@/components/detail/DetailQuickRow'
+import type { DetailMetricItem } from '@/components/detail/types'
 import { formatTzsCurrency } from '@/lib/currency'
 import { formatDate } from '@/lib/date'
 import type { Medicine } from '@/types/inventory'
 import type { MedicineStatusState } from '@/types/medicine-detail'
-import { MedicineDetailHero } from './detail/MedicineDetailHero'
-import { MedicineDetailSection } from './detail/MedicineDetailSection'
-import { MedicineQuickRow } from './detail/MedicineQuickRow'
 import { MedicineTimelineCard } from './detail/MedicineTimelineCard'
 
 interface MedicineDetailProps {
@@ -56,6 +57,35 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
   const sellingPrice = formatTzsCurrency(medicine.selling_price)
   const purchasePrice = medicine.purchase_price ? formatTzsCurrency(medicine.purchase_price) : 'Pending procurement'
   const profitPerUnit = medicine.profit_per_unit ? formatTzsCurrency(medicine.profit_per_unit) : 'Pending procurement'
+  const expiryLabel = medicine.days_to_expiry === null ? 'Pending batch' : `${medicine.days_to_expiry} days`
+
+  const metrics: DetailMetricItem[] = [
+    {
+      icon: PackageCheck,
+      label: 'Stock On Hand',
+      value: `${medicine.stock_quantity} ${medicine.unit}`,
+      hint: `Min ${medicine.min_stock_level} / Max ${medicine.max_stock_level}`,
+    },
+    {
+      icon: BadgeDollarSign,
+      label: 'Selling Price',
+      value: sellingPrice,
+      hint: `Buy at ${purchasePrice}`,
+    },
+    {
+      icon: Box,
+      label: 'Profit Per Unit',
+      value: profitPerUnit,
+      hint: medicine.markup_percentage ? `${medicine.markup_percentage}% markup` : 'Markup auto-calculated',
+    },
+    {
+      icon: CalendarClock,
+      label: 'Expiry Window',
+      value: expiryLabel,
+      hint: expiryDateLabel,
+      tone: medicine.days_to_expiry !== null && medicine.days_to_expiry <= 30 ? 'danger' : 'default',
+    },
+  ]
 
   return (
     <ResponsiveModal
@@ -66,19 +96,24 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
       dialogContentClassName="sm:max-w-4xl"
     >
       <div className="space-y-6 pb-1">
-        <MedicineDetailHero
-          medicine={medicine}
-          stockState={stockState}
-          expiryState={expiryState}
-          sellingPrice={sellingPrice}
-          purchasePrice={purchasePrice}
-          profitPerUnit={profitPerUnit}
-          expiryLabel={medicine.days_to_expiry === null ? 'Pending batch' : `${medicine.days_to_expiry} days`}
-          expiryDateLabel={expiryDateLabel}
+        <DetailHero
+          icon={Pill}
+          title={medicine.name}
+          subtitle={medicine.generic_name || 'Generic name not recorded'}
+          metrics={metrics}
+          badges={[
+            { label: stockState.label, tone: stockState.tone },
+            { label: expiryState.label, tone: expiryState.tone },
+            {
+              label: medicine.requires_prescription ? 'Prescription required' : 'Over the counter',
+              variant: medicine.requires_prescription ? 'destructive' : 'secondary',
+            },
+            { label: medicine.is_active ? 'Active' : 'Inactive', variant: medicine.is_active ? 'default' : 'secondary' },
+          ]}
         />
 
         <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <MedicineDetailSection
+          <DetailInfoCard
             title="Product Overview"
             description="Key reference details for this medicine"
             icon={Pill}
@@ -90,7 +125,7 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
             ]}
           />
 
-          <MedicineDetailSection
+          <DetailInfoCard
             title="Storage & Compliance"
             description="Operational details used during stock handling"
             icon={Warehouse}
@@ -147,12 +182,12 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
               </div>
 
               <div className="space-y-3">
-                <MedicineQuickRow label="Batch Number" value={medicine.batch_number || 'Pending first purchase'} />
-                <MedicineQuickRow
+                <DetailQuickRow label="Batch Number" value={medicine.batch_number || 'Pending first purchase'} />
+                <DetailQuickRow
                   label="Shelf Slot"
                   value={medicine.storage_location || 'Pending assignment'}
                 />
-                <MedicineQuickRow
+                <DetailQuickRow
                   label="Package Conversions"
                   value={
                     medicine.unit_conversions.filter((item) => !item.is_base_unit).length > 0
@@ -160,11 +195,11 @@ export function MedicineDetail({ open, onOpenChange, medicine }: MedicineDetailP
                       : 'No package conversions configured'
                   }
                 />
-                <MedicineQuickRow
+                <DetailQuickRow
                   label="Barcode"
                   value={medicine.barcode || 'Missing barcode'}
                 />
-                <MedicineQuickRow
+                <DetailQuickRow
                   label="Controlled Access"
                   value={
                     medicine.requires_prescription

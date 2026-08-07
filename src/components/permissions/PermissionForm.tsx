@@ -15,8 +15,7 @@ import type { PermissionDetail } from '@/types/auth'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Permission name is required'),
-  codename: z.string().trim().min(1, 'Codename is required'),
-  content_type: z.coerce.number().min(1, 'Content type ID is required'),
+  codename: z.string().trim().min(1, 'Permission key is required'),
 })
 
 type FormData = z.input<typeof schema>
@@ -44,7 +43,6 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
     defaultValues: {
       name: '',
       codename: '',
-      content_type: 0,
     },
   })
 
@@ -53,12 +51,11 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
       reset({
         name: permission.name,
         codename: permission.codename,
-        content_type: permission.content_type,
       })
       return
     }
 
-    reset({ name: '', codename: '', content_type: 0 })
+    reset({ name: '', codename: '' })
   }, [permission, reset])
 
   const onSubmit = async (data: FormData) => {
@@ -69,7 +66,6 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
           payload: {
             name: data.name,
             codename: data.codename,
-            content_type: Number(data.content_type),
           },
         })
         notify.success('Permission updated successfully')
@@ -77,7 +73,6 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
         await createPermission.mutateAsync({
           name: data.name,
           codename: data.codename,
-          content_type: Number(data.content_type),
         })
         notify.success('Permission created successfully')
       }
@@ -98,26 +93,27 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? 'Edit Permission' : 'Add Permission'}
-      description="Create or update system permissions"
+      description="Define an access right that can be assigned to staff roles."
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
           <FormSection title="Permission Details">
-            <FormFieldWrapper label="Permission Name" htmlFor="name" error={errors.name?.message}>
+            <FormFieldWrapper
+              label="Permission Name"
+              htmlFor="name"
+              error={errors.name?.message}
+              helperText="What staff will see when assigning this to a role."
+            >
               <Input id="name" placeholder="View Sales" {...register('name')} />
             </FormFieldWrapper>
 
-            <FormFieldWrapper label="Codename" htmlFor="codename" error={errors.codename?.message}>
-              <Input id="codename" placeholder="view_sale" {...register('codename')} />
-            </FormFieldWrapper>
-
             <FormFieldWrapper
-              label="Content Type ID"
-              htmlFor="content_type"
-              error={errors.content_type?.message}
-              helperText="Use the target model content type numeric ID."
+              label="Permission Key"
+              htmlFor="codename"
+              error={errors.codename?.message}
+              helperText="A unique internal code, e.g. sales.sale.view - lowercase, no spaces."
             >
-              <Input id="content_type" type="number" min={1} placeholder="1" {...register('content_type')} />
+              <Input id="codename" placeholder="sales.sale.view" {...register('codename')} />
             </FormFieldWrapper>
           </FormSection>
 

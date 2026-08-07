@@ -1,23 +1,8 @@
-import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { DetailTone } from '@/types/medicine-detail'
+import type { DetailMetricItem } from './types'
 
-interface MedicineMetricCardProps {
-  icon: LucideIcon
-  label: string
-  value: string
-  hint: string
-  tone?: DetailTone
-}
-
-export function MedicineMetricCard({
-  icon: Icon,
-  label,
-  value,
-  hint,
-  tone = 'default',
-}: MedicineMetricCardProps) {
+export function DetailMetricCard({ icon: Icon, label, value, hint, tone = 'default' }: DetailMetricItem) {
   return (
     <Card
       className={cn(
@@ -45,4 +30,3 @@ export function MedicineMetricCard({
     </Card>
   )
 }
-

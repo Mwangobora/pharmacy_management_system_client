@@ -1,20 +1,15 @@
 import type { LucideIcon } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import type { MedicineDetailItem } from '@/types/medicine-detail'
+import type { DetailInfoItem } from './types'
 
-interface MedicineDetailSectionProps {
+interface DetailInfoCardProps {
   title: string
-  description: string
+  description?: string
   icon: LucideIcon
-  items: MedicineDetailItem[]
+  items: DetailInfoItem[]
 }
 
-export function MedicineDetailSection({
-  title,
-  description,
-  icon: Icon,
-  items,
-}: MedicineDetailSectionProps) {
+export function DetailInfoCard({ title, description, icon: Icon, items }: DetailInfoCardProps) {
   return (
     <Card className="rounded-3xl border-border/70 shadow-sm">
       <CardContent className="space-y-5 p-6">
@@ -24,7 +19,7 @@ export function MedicineDetailSection({
           </div>
           <div>
             <h4 className="font-semibold">{title}</h4>
-            <p className="text-sm text-muted-foreground">{description}</p>
+            {description && <p className="text-sm text-muted-foreground">{description}</p>}
           </div>
         </div>
 
@@ -34,7 +29,7 @@ export function MedicineDetailSection({
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 {item.label}
               </p>
-              <p className="mt-2 text-sm font-medium text-foreground">{item.value}</p>
+              <p className="mt-2 break-words text-sm font-medium text-foreground">{item.value}</p>
             </div>
           ))}
         </div>
@@ -42,4 +37,3 @@ export function MedicineDetailSection({
     </Card>
   )
 }
-

@@ -104,7 +104,13 @@ export default function CustomersPage() {
       />
 
       <CustomerForm open={formOpen} onOpenChange={setFormOpen} customer={selectedCustomer} />
-      <CustomerDetail open={detailOpen} onOpenChange={setDetailOpen} customer={selectedCustomer} />
+      <CustomerDetail
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        customer={selectedCustomer}
+        onEdit={handleEdit}
+        onDelete={(item) => setDeleteId(item.id)}
+      />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}

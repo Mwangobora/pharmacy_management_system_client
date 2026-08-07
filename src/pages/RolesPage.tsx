@@ -120,6 +120,7 @@ export default function RolesPage() {
           setSelectedRole(role)
           setFormOpen(true)
         }}
+        onDelete={(role) => setDeleteId(role.id)}
       />
       <ConfirmDialog
         open={deleteId !== null}

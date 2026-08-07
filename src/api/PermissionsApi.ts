@@ -5,7 +5,7 @@ import { ENDPOINTS } from './endpoints'
 export interface PermissionCreatePayload {
   name: string
   codename: string
-  content_type: number
+  content_type?: number
 }
 
 export interface PermissionUpdatePayload {

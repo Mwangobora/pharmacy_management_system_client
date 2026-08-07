@@ -393,7 +393,11 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
                         </Select>
                       </FormFieldWrapper>
 
-                      <FormFieldWrapper label="Factor to Base Unit" error={errors.unit_conversions?.[index]?.factor_to_base_unit?.message}>
+                      <FormFieldWrapper
+                        label="Units Per Package"
+                        error={errors.unit_conversions?.[index]?.factor_to_base_unit?.message}
+                        helperText={`How many ${String(watch('base_unit') || 'base units')} are in one package`}
+                      >
                         <Input type="number" min={1} {...register(`unit_conversions.${index}.factor_to_base_unit`, { valueAsNumber: true })} />
                       </FormFieldWrapper>
 
