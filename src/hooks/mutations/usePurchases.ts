@@ -3,9 +3,19 @@ import { PurchasesApi } from '@/api/SuppliersApi'
 import type {
   PurchaseCreatePayload,
   PurchaseUpdatePayload,
+  ReceiveItemsPayload,
   UpdatePaymentStatusPayload,
 } from '@/types/suppliers'
 import { purchaseKeys } from '../queries/usePurchases'
+import { medicineKeys } from '../queries/useMedicines'
+
+// Receiving a purchase creates/updates batches and medicine stock, so any
+// successful create/receive must also invalidate inventory caches -
+// otherwise the Inventory pages and sidebar keep showing stale (e.g. 0) stock.
+function invalidatePurchaseAndStockCaches(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: purchaseKeys.lists() })
+  queryClient.invalidateQueries({ queryKey: medicineKeys.all })
+}
 
 export function useCreatePurchase() {
   const queryClient = useQueryClient()
@@ -13,7 +23,20 @@ export function useCreatePurchase() {
   return useMutation({
     mutationFn: (payload: PurchaseCreatePayload) => PurchasesApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: purchaseKeys.lists() })
+      invalidatePurchaseAndStockCaches(queryClient)
+    },
+  })
+}
+
+export function useReceiveItems() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: ReceiveItemsPayload }) =>
+      PurchasesApi.receiveItems(id, payload),
+    onSuccess: (_, variables) => {
+      invalidatePurchaseAndStockCaches(queryClient)
+      queryClient.invalidateQueries({ queryKey: purchaseKeys.detail(variables.id) })
     },
   })
 }

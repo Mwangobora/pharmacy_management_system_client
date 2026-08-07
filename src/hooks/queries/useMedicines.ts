@@ -49,9 +49,10 @@ export function useExpiredMedicines() {
   })
 }
 
-export function useDashboardStats() {
+export function useDashboardStats(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: medicineKeys.dashboardStats(),
     queryFn: ({ signal }) => MedicinesApi.getDashboardStats(signal),
+    enabled: options?.enabled,
   })
 }

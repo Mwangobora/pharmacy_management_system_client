@@ -7,7 +7,6 @@ import { LoadingScreen } from '@/components/LoadingScreen'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
-const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const UsersPage = lazy(() => import('@/pages/UsersPage'))
@@ -37,7 +36,6 @@ export function AppRoutes() {
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
         <Route path={ROUTES.ACCESS_DENIED} element={<AccessDeniedPage />} />
 
         <Route element={<ProtectedRoute />}>

@@ -13,11 +13,14 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { ROUTES } from '@/routes/paths'
 import { PermissionGuard } from '@/components/PermissionGuard'
+import { useAnyPermission } from '@/hooks/usePermissions'
+import { useDashboardStats } from '@/hooks/queries/useMedicines'
 
 type NavItem = {
   name: string
@@ -77,6 +80,13 @@ const navigation: NavItem[] = [
 
 export function AppSidebar() {
   const location = useLocation()
+  const canViewInventoryStats = useAnyPermission([
+    'inventory.category.view',
+    'inventory.medicine.view',
+    'inventory.stock_transaction.view',
+  ])
+  const { data: dashboardStats } = useDashboardStats({ enabled: canViewInventoryStats })
+  const lowStockCount = dashboardStats?.low_stock_count ?? 0
 
   const isActive = (href: string) => {
     if (href === ROUTES.HOME) return location.pathname === ROUTES.HOME
@@ -113,6 +123,11 @@ export function AppSidebar() {
                     <span className="text-[13px] font-medium">{item.name}</span>
                   </Link>
                 </SidebarMenuButton>
+                {item.href === ROUTES.INVENTORY && lowStockCount > 0 && (
+                  <SidebarMenuBadge className="bg-destructive/15 text-destructive">
+                    {lowStockCount > 99 ? '99+' : lowStockCount}
+                  </SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             </PermissionGuard>
           ))}

@@ -95,7 +95,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
     reset({
       supplier: '',
       invoice_number: '',
-      purchase_date: '',
+      purchase_date: new Date().toISOString().slice(0, 10),
       notes: '',
       items: [],
     })
