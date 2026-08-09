@@ -17,6 +17,7 @@ export interface ListParams {
   ordering?: string
   is_active?: string
   page?: string
+  page_size?: string
 }
 
 export interface MedicineListParams extends ListParams {

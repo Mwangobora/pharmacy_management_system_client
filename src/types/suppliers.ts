@@ -80,7 +80,6 @@ export interface PurchaseItemPayload {
 
 export interface PurchaseCreatePayload {
   supplier: string
-  invoice_number: string
   purchase_date: string
   tax_amount?: string
   discount_amount?: string

@@ -42,7 +42,11 @@ export function SalesPosWorkspace() {
 
   const user = useAuthStore((state) => state.user)
   const createSale = useCreateSale()
-  const { data: medicines = [], isLoading: medicinesLoading, isError: medicinesError, refetch } = useMedicines()
+  // page_size=200: POS search filters client-side (name, generic name,
+  // category, supplier, barcode, batch, unit) for instant results with no
+  // per-keystroke network round trip, so the full catalog needs to be loaded
+  // up front - the default 20/page would silently hide anything past page 1.
+  const { data: medicines = [], isLoading: medicinesLoading, isError: medicinesError, refetch } = useMedicines({ page_size: '200' })
   const { data: customers = [], isLoading: customersLoading } = useCustomers()
 
   const safeMedicines = useMemo(() => (Array.isArray(medicines) ? medicines : []), [medicines])

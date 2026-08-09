@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
+import { SearchableSelect } from '@/components/forms/SearchableSelect'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCategories } from '@/hooks/queries/useCategories'
 import { useSuppliers } from '@/hooks/queries/useSuppliers'
@@ -285,33 +286,32 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
 
             <div className="grid gap-4 md:grid-cols-2">
               <FormFieldWrapper label="Category" error={errors.category?.message}>
-                <Select value={watch('category')} onValueChange={(value) => setValue('category', value, { shouldValidate: true })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(categories) && categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={watch('category')}
+                  onValueChange={(value) => setValue('category', value, { shouldValidate: true })}
+                  options={(Array.isArray(categories) ? categories : []).map((category) => ({
+                    value: category.id,
+                    label: category.name,
+                  }))}
+                  placeholder="Select category"
+                  searchPlaceholder="Search categories..."
+                  emptyMessage="No categories found."
+                />
               </FormFieldWrapper>
 
               <FormFieldWrapper label="Supplier" error={errors.supplier?.message}>
-                <Select value={watch('supplier')} onValueChange={(value) => setValue('supplier', value, { shouldValidate: true })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.isArray(suppliers) && suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={watch('supplier')}
+                  onValueChange={(value) => setValue('supplier', value, { shouldValidate: true })}
+                  options={(Array.isArray(suppliers) ? suppliers : []).map((supplier) => ({
+                    value: supplier.id,
+                    label: supplier.name,
+                    hint: supplier.phone,
+                  }))}
+                  placeholder="Select supplier"
+                  searchPlaceholder="Search suppliers..."
+                  emptyMessage="No suppliers found."
+                />
               </FormFieldWrapper>
             </div>
 

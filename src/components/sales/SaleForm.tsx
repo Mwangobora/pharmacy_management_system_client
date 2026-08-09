@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
+import { SearchableSelect } from '@/components/forms/SearchableSelect'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
 import { useCustomers } from '@/hooks/queries/useCustomers'
 import { useMedicines } from '@/hooks/queries/useMedicines'
@@ -52,7 +53,8 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
 export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
   const { data: customers = [] } = useCustomers()
   const safeCustomers = Array.isArray(customers) ? customers : []
-  const { data: medicines = [] } = useMedicines()
+  // Default page size is 20 - this picker needs the whole catalog to search.
+  const { data: medicines = [] } = useMedicines({ page_size: '200' })
   const safeMedicines = Array.isArray(medicines) ? medicines : []
   const createSale = useCreateSale()
   const updateSale = useUpdateSale()
@@ -267,7 +269,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                       <div key={field.id} className="rounded-lg border border-border/60 p-3">
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
                           <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message}>
-                            <Select
+                            <SearchableSelect
                               value={selectedMedicineId || ''}
                               onValueChange={(value) => {
                                 setValue(`items.${index}.medicine`, value, { shouldValidate: true })
@@ -275,18 +277,15 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                                 const unit = medicine ? getSaleUnits(medicine)[0]?.unit_name ?? medicine.base_unit ?? medicine.unit : ''
                                 setValue(`items.${index}.unit_name`, unit, { shouldValidate: true })
                               }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select medicine" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {safeMedicines.map((medicine) => (
-                                  <SelectItem key={medicine.id} value={medicine.id}>
-                                    {medicine.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              options={safeMedicines.map((medicine) => ({
+                                value: medicine.id,
+                                label: medicine.name,
+                                hint: [medicine.generic_name, medicine.category_name].filter(Boolean).join(' · '),
+                              }))}
+                              placeholder="Select medicine"
+                              searchPlaceholder="Search medicines..."
+                              emptyMessage="No medicines found."
+                            />
                           </FormFieldWrapper>
 
                           <FormFieldWrapper label="Unit">
