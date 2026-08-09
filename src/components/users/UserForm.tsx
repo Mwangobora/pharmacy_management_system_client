@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { KeyRound, Loader2, ShieldCheck, UserCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ResponsiveModal } from '@/components/ResponsiveModal'
@@ -127,23 +127,23 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
     <ResponsiveModal open={open} onOpenChange={onOpenChange} title={isEditing ? 'Edit User' : 'Add User'} description="Create or update user accounts and access.">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Account Details">
+          <FormSection title="Account Details" description="Login credentials for this staff member." icon={UserCircle}>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Username" error={errors.username?.message}>
-                <Input placeholder="john.doe" {...register('username')} />
+              <FormFieldWrapper label="Username" error={errors.username?.message} required>
+                <Input placeholder="e.g. john.doe" {...register('username')} />
               </FormFieldWrapper>
-              <FormFieldWrapper label="Email" error={errors.email?.message}>
-                <Input type="email" placeholder="name@company.com" {...register('email')} />
+              <FormFieldWrapper label="Email Address" error={errors.email?.message} required>
+                <Input type="email" placeholder="e.g. john.doe@pharmasys.co.tz" {...register('email')} />
               </FormFieldWrapper>
             </div>
             {!isEditing && (
-              <FormFieldWrapper label="Password" error={errors.password?.message} helperText="Use at least 8 characters.">
-                <Input type="password" placeholder="Secure password" {...register('password')} />
+              <FormFieldWrapper label="Password" error={errors.password?.message} helperText="Use at least 8 characters." required>
+                <Input type="password" placeholder="Enter a secure password" {...register('password')} />
               </FormFieldWrapper>
             )}
           </FormSection>
 
-          <FormSection title="Role Assignments">
+          <FormSection title="Role Assignments" description="Roles determine which parts of the system this user can access." icon={ShieldCheck}>
             <SearchableSelectionField
               title="Assign one or more roles"
               items={roleItems}
@@ -155,7 +155,7 @@ export function UserForm({ open, onOpenChange, user }: UserFormProps) {
             />
           </FormSection>
 
-          <FormSection title="Direct Permissions" description="Use sparingly for exception-based access overrides.">
+          <FormSection title="Direct Permissions" description="Use sparingly for exception-based access overrides." icon={KeyRound}>
             <SearchableSelectionField
               title="Optional direct permissions"
               items={permissionItems}

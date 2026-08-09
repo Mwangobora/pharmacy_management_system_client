@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { KeyRound, Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -18,7 +18,7 @@ import type { RoleDetail } from '@/types/auth'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Role name is required'),
-  code: z.string().trim().min(1, 'Role code is required'),
+  code: z.string().trim().optional(),
   description: z.string().optional(),
   permissions: z.array(z.number()).default([]),
   is_active: z.boolean().default(true),
@@ -103,10 +103,10 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
   const onSubmit = async (data: FormData) => {
     try {
       if (isEditing) {
-        await updateRole.mutateAsync({ id: role.id, payload: data })
+        await updateRole.mutateAsync({ id: role.id, payload: { ...data, code: data.code || '' } })
         notify.success('Role updated successfully')
       } else {
-        await createRole.mutateAsync({ ...data, permissions: data.permissions ?? [] })
+        await createRole.mutateAsync({ ...data, code: data.code || '', permissions: data.permissions ?? [] })
         notify.success('Role created successfully')
       }
       onOpenChange(false)
@@ -130,18 +130,18 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Role Profile">
-            <FormFieldWrapper label="Role Name" htmlFor="name" error={errors.name?.message}>
-              <Input id="name" placeholder="Pharmacist" {...register('name')} />
+          <FormSection title="Role Profile" description="The staff role and what it's called in the system." icon={ShieldCheck}>
+            <FormFieldWrapper label="Role Name" htmlFor="name" error={errors.name?.message} required>
+              <Input id="name" placeholder="e.g. Pharmacist" {...register('name')} />
             </FormFieldWrapper>
-            <FormFieldWrapper label="Role Code" htmlFor="code" error={errors.code?.message}>
-              <Input id="code" placeholder="pharmacist" {...register('code')} />
+            <FormFieldWrapper label="Role Code" htmlFor="code" error={errors.code?.message} helperText="Optional - auto-generated from the name if left blank.">
+              <Input id="code" placeholder="e.g. pharmacist" {...register('code')} />
             </FormFieldWrapper>
-            <FormFieldWrapper label="Description" htmlFor="description">
-              <Input id="description" placeholder="Describe the purpose of this role" {...register('description')} />
+            <FormFieldWrapper label="Description" htmlFor="description" helperText="Optional - shown to admins when assigning this role.">
+              <Input id="description" placeholder="e.g. Dispenses medicines and completes approved sales" {...register('description')} />
             </FormFieldWrapper>
 
-            <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
+            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-background px-3 py-2.5">
               <span className="text-sm font-medium">Active Role</span>
               <Switch
                 id="is_active"
@@ -151,7 +151,7 @@ export function RoleForm({ open, onOpenChange, role }: RoleFormProps) {
             </div>
           </FormSection>
 
-          <FormSection title="Permissions" description="Search, assign, and remove access rights for this role.">
+          <FormSection title="Permissions" description="Search, assign, and remove access rights for this role." icon={KeyRound}>
             <FormFieldWrapper
               label="Permission List"
               helperText="Use only the permissions this staff role truly needs."

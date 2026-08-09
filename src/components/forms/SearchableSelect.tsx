@@ -94,7 +94,7 @@ export function SearchableSelect({
           type="button"
           disabled={disabled}
           className={cn(
-            'border-input data-[placeholder]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex h-10 w-full items-center justify-between gap-2 rounded-lg border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+            'border-input data-[state=open]:border-primary flex h-11 w-full items-center justify-between gap-2 rounded-lg border-[1.5px] bg-transparent px-3.5 py-2.5 text-[15px] shadow-xs transition-colors outline-none focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
             className,
           )}
         >

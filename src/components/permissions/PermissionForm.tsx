@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { KeyRound, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormActions, FormFieldWrapper, FormLayout, FormSection } from '@/components/forms/FormPrimitives'
@@ -97,14 +97,15 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Permission Details">
+          <FormSection title="Permission Details" description="A single access right that can be granted to a role." icon={KeyRound}>
             <FormFieldWrapper
               label="Permission Name"
               htmlFor="name"
               error={errors.name?.message}
               helperText="What staff will see when assigning this to a role."
+              required
             >
-              <Input id="name" placeholder="View Sales" {...register('name')} />
+              <Input id="name" placeholder="e.g. View Sales" {...register('name')} />
             </FormFieldWrapper>
 
             <FormFieldWrapper
@@ -112,8 +113,9 @@ export function PermissionForm({ open, onOpenChange, permission }: PermissionFor
               htmlFor="codename"
               error={errors.codename?.message}
               helperText="A unique internal code, e.g. sales.sale.view - lowercase, no spaces."
+              required
             >
-              <Input id="codename" placeholder="sales.sale.view" {...register('codename')} />
+              <Input id="codename" placeholder="e.g. sales.sale.view" {...register('codename')} />
             </FormFieldWrapper>
           </FormSection>
 

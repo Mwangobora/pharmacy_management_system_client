@@ -4,7 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { CreditCard, Loader2, Plus, ShoppingCart, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -177,27 +177,24 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-4">
         <FormLayout className="max-w-none">
-          <FormSection title="Sale Details">
+          <FormSection title="Sale Details" description="Who this sale is for and how they're paying." icon={CreditCard}>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Customer">
-                <Select
+              <FormFieldWrapper label="Customer" helperText="Optional - leave blank for a walk-in customer.">
+                <SearchableSelect
                   value={watch('customer') || ''}
                   onValueChange={(value) => setValue('customer', value, { shouldValidate: true })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Walk-in customer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {safeCustomers.map((customer) => (
-                      <SelectItem key={customer.id} value={customer.id}>
-                        {customer.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={safeCustomers.map((customer) => ({
+                    value: customer.id,
+                    label: customer.full_name,
+                    hint: customer.phone,
+                  }))}
+                  placeholder="Walk-in customer"
+                  searchPlaceholder="Search customers..."
+                  emptyMessage="No customers found."
+                />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Payment Method" error={errors.payment_method?.message}>
+              <FormFieldWrapper label="Payment Method" error={errors.payment_method?.message} required>
                 <Select
                   value={watch('payment_method')}
                   onValueChange={(value) => setValue('payment_method', value as PaymentMethod, { shouldValidate: true })}
@@ -216,13 +213,13 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
               </FormFieldWrapper>
             </div>
 
-            <FormFieldWrapper label="Notes">
-              <Textarea placeholder="Optional note" {...register('notes')} className="min-h-10" />
+            <FormFieldWrapper label="Notes" helperText="Optional - internal note about this sale.">
+              <Textarea placeholder="e.g. Dispensed against prescription #4521" {...register('notes')} className="min-h-10" />
             </FormFieldWrapper>
           </FormSection>
 
           {!isEditing && (
-            <FormSection title="Items" description="Select the selling unit and quantity. The form shows the conversion, available quantity, and price before checkout.">
+            <FormSection title="Items" description="Select the selling unit and quantity. The form shows the conversion, available quantity, and price before checkout." icon={ShoppingCart}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-muted-foreground">Subtotal preview: {formatTzsCurrency(totalsPreview)}</p>
                 <Button
@@ -268,7 +265,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                     return (
                       <div key={field.id} className="rounded-lg border border-border/60 p-3">
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-                          <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message}>
+                          <FormFieldWrapper label="Medicine" className="sm:col-span-2 xl:col-span-2" error={errors.items?.[index]?.medicine?.message} required>
                             <SearchableSelect
                               value={selectedMedicineId || ''}
                               onValueChange={(value) => {
@@ -307,7 +304,7 @@ export function SaleForm({ open, onOpenChange, sale }: SaleFormProps) {
                             </Select>
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Qty" error={errors.items?.[index]?.quantity?.message}>
+                          <FormFieldWrapper label="Quantity" error={errors.items?.[index]?.quantity?.message} required>
                             <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
                           </FormFieldWrapper>
 

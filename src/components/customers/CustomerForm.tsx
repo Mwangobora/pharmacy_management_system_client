@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MapPin, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -131,30 +131,30 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Customer Information">
+          <FormSection title="Personal Details" description="Used for prescriptions, receipts, and loyalty tracking." icon={User}>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="First Name" htmlFor="first_name" error={errors.first_name?.message}>
-                <Input id="first_name" placeholder="John" {...register('first_name')} />
+              <FormFieldWrapper label="First Name" htmlFor="first_name" error={errors.first_name?.message} required>
+                <Input id="first_name" placeholder="e.g. John" {...register('first_name')} />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Last Name" htmlFor="last_name" error={errors.last_name?.message}>
-                <Input id="last_name" placeholder="Doe" {...register('last_name')} />
+              <FormFieldWrapper label="Last Name" htmlFor="last_name" error={errors.last_name?.message} required>
+                <Input id="last_name" placeholder="e.g. Doe" {...register('last_name')} />
               </FormFieldWrapper>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Phone" htmlFor="phone" error={errors.phone?.message}>
-                <Input id="phone" placeholder="+255712345678" {...register('phone')} />
+              <FormFieldWrapper label="Phone Number" htmlFor="phone" error={errors.phone?.message} required>
+                <Input id="phone" placeholder="e.g. +255 712 345 678" {...register('phone')} />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Email" htmlFor="email" error={errors.email?.message}>
-                <Input id="email" type="email" placeholder="name@domain.com" {...register('email')} />
+              <FormFieldWrapper label="Email Address" htmlFor="email" error={errors.email?.message}>
+                <Input id="email" type="email" placeholder="e.g. name@domain.com" {...register('email')} />
               </FormFieldWrapper>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Age" htmlFor="age" helperText="Optional. Used to infer birth year.">
-                <Input id="age" type="number" min={0} placeholder="30" {...register('age')} />
+              <FormFieldWrapper label="Age" htmlFor="age" helperText="Optional - used to estimate birth year.">
+                <Input id="age" type="number" min={0} placeholder="e.g. 30" {...register('age')} />
               </FormFieldWrapper>
 
               <FormFieldWrapper label="Gender" error={errors.gender?.message}>
@@ -170,7 +170,7 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className="flex items-center gap-2 rounded-lg border border-border/60 px-3 py-2 text-sm"
+                      className="flex items-center gap-2 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                     >
                       <RadioGroupItem value={option.value} />
                       <Label className="cursor-pointer font-normal">{option.label}</Label>
@@ -179,9 +179,11 @@ export function CustomerForm({ open, onOpenChange, customer }: CustomerFormProps
                 </RadioGroup>
               </FormFieldWrapper>
             </div>
+          </FormSection>
 
-            <FormFieldWrapper label="Address" htmlFor="address">
-              <Textarea id="address" placeholder="Street, city, region" {...register('address')} />
+          <FormSection title="Address" icon={MapPin}>
+            <FormFieldWrapper label="Home Address" htmlFor="address" helperText="Optional - street, ward, and city.">
+              <Textarea id="address" placeholder="e.g. Kinondoni, Dar es Salaam" {...register('address')} />
             </FormFieldWrapper>
           </FormSection>
 

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Boxes, Layers, Loader2, Pill, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -243,20 +243,22 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout className="max-w-none space-y-4">
-          <FormSection title="Product Master">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              <FormFieldWrapper label="Medicine Name" error={errors.name?.message} className="xl:col-span-2">
-                <Input placeholder="Paracetamol 500mg" {...register('name')} />
+          <FormSection title="Product Master" description="The core identity of this medicine in the catalog." icon={Pill}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper label="Medicine Name" error={errors.name?.message} required>
+                <Input placeholder="e.g. Paracetamol 500mg Tablets" {...register('name')} />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Generic Name" error={errors.generic_name?.message} className="xl:col-span-2">
-                <Input placeholder="Optional" {...register('generic_name')} />
+              <FormFieldWrapper label="Generic Name" error={errors.generic_name?.message} helperText="Optional - the active ingredient.">
+                <Input placeholder="e.g. Paracetamol" {...register('generic_name')} />
               </FormFieldWrapper>
+            </div>
 
-              <FormFieldWrapper label="Dosage Form">
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormFieldWrapper label="Dosage Form" helperText="Optional - suggests a base unit.">
                 <Select value={watch('dosage_form') || ''} onValueChange={(value) => setValue('dosage_form', value, { shouldValidate: true })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Optional suggestion source" />
+                    <SelectValue placeholder="Select form" />
                   </SelectTrigger>
                   <SelectContent>
                     {DOSAGE_FORMS.map((item) => (
@@ -268,7 +270,7 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
                 </Select>
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Base Unit" error={errors.base_unit?.message}>
+              <FormFieldWrapper label="Base Unit" error={errors.base_unit?.message} required>
                 <Select value={watch('base_unit') || ''} onValueChange={(value) => setValue('base_unit', value as MedicineUnit, { shouldValidate: true })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Confirm base unit" />
@@ -285,7 +287,7 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Category" error={errors.category?.message}>
+              <FormFieldWrapper label="Category" error={errors.category?.message} required>
                 <SearchableSelect
                   value={watch('category')}
                   onValueChange={(value) => setValue('category', value, { shouldValidate: true })}
@@ -299,7 +301,7 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
                 />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Supplier" error={errors.supplier?.message}>
+              <FormFieldWrapper label="Supplier" error={errors.supplier?.message} required>
                 <SearchableSelect
                   value={watch('supplier')}
                   onValueChange={(value) => setValue('supplier', value, { shouldValidate: true })}
@@ -325,28 +327,28 @@ export function MedicineForm({ open, onOpenChange, medicine }: MedicineFormProps
             </div>
           </FormSection>
 
-          <FormSection title="Selling & Reorder">
+          <FormSection title="Selling & Reorder" description="Pricing and the stock thresholds that trigger low-stock alerts." icon={Boxes}>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <FormFieldWrapper label="Selling Price" error={errors.selling_price?.message}>
-                <Input placeholder="0.00" {...register('selling_price')} />
+              <FormFieldWrapper label="Selling Price" error={errors.selling_price?.message} required>
+                <Input placeholder="e.g. 500.00" {...register('selling_price')} />
               </FormFieldWrapper>
-              <FormFieldWrapper label="Minimum Stock" error={errors.min_stock_level?.message}>
+              <FormFieldWrapper label="Minimum Stock" error={errors.min_stock_level?.message} helperText="Low-stock alert threshold.">
                 <Input type="number" min={0} {...register('min_stock_level', { valueAsNumber: true })} />
               </FormFieldWrapper>
               <FormFieldWrapper label="Maximum Stock" error={errors.max_stock_level?.message}>
                 <Input type="number" min={1} {...register('max_stock_level', { valueAsNumber: true })} />
               </FormFieldWrapper>
-              <FormFieldWrapper label="Storage Location" error={errors.storage_location?.message}>
-                <Input placeholder="Optional shelf/bin" {...register('storage_location')} />
+              <FormFieldWrapper label="Storage Location" error={errors.storage_location?.message} helperText="Optional - shelf or bin code.">
+                <Input placeholder="e.g. Shelf A3" {...register('storage_location')} />
               </FormFieldWrapper>
             </div>
 
-            <FormFieldWrapper label="Barcode" error={errors.barcode?.message}>
-              <Input placeholder="Optional barcode" {...register('barcode')} />
+            <FormFieldWrapper label="Barcode" error={errors.barcode?.message} helperText="Optional - for barcode-scanner checkout.">
+              <Input placeholder="e.g. 6009123456789" {...register('barcode')} />
             </FormFieldWrapper>
           </FormSection>
 
-          <FormSection title="Package Conversions" description="Optional package units for purchasing and selling. Example: 1 strip = 10 tablets.">
+          <FormSection title="Package Conversions" description="Optional package units for purchasing and selling. Example: 1 strip = 10 tablets." icon={Layers}>
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 Base unit stays in the medicine master. Package units convert into that base unit.

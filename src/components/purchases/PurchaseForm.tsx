@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { ClipboardList, Loader2, Plus, Trash2, Truck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -179,9 +179,9 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
             </div>
           )}
 
-          <FormSection title="Purchase Details">
+          <FormSection title="Purchase Details" description="Which supplier this stock is coming from and when." icon={Truck}>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Supplier" error={errors.supplier?.message}>
+              <FormFieldWrapper label="Supplier" error={errors.supplier?.message} required>
                 <SearchableSelect
                   value={watch('supplier')}
                   onValueChange={(value) => setValue('supplier', value, { shouldValidate: true })}
@@ -193,18 +193,18 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                 />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Purchase Date" error={errors.purchase_date?.message}>
+              <FormFieldWrapper label="Purchase Date" error={errors.purchase_date?.message} required>
                 <Input type="date" {...register('purchase_date')} />
               </FormFieldWrapper>
             </div>
 
-            <FormFieldWrapper label="Notes">
-              <Textarea placeholder="Optional notes" {...register('notes')} className="min-h-10" />
+            <FormFieldWrapper label="Notes" helperText="Optional - internal note about this purchase.">
+              <Textarea placeholder="e.g. Delivered by courier, invoice attached" {...register('notes')} className="min-h-10" />
             </FormFieldWrapper>
           </FormSection>
 
           {!isEditing && (
-            <FormSection title="Items" description="Add quantity and unit cost for each medicine.">
+            <FormSection title="Items" description="Add quantity and unit cost for each medicine." icon={ClipboardList}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-muted-foreground">Enter the purchased unit, lot details, and unit cost. The form shows the resulting base-unit quantity before submission.</p>
                 <Button
@@ -241,7 +241,7 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                         </div>
 
                         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                          <FormFieldWrapper label="Medicine" className="sm:col-span-2" error={errors.items?.[index]?.medicine?.message}>
+                          <FormFieldWrapper label="Medicine" className="sm:col-span-2" error={errors.items?.[index]?.medicine?.message} required>
                             <SearchableSelect
                               value={watch(`items.${index}.medicine`) || ''}
                               onValueChange={(value) => {
@@ -291,13 +291,13 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                             </Select>
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Quantity" error={errors.items?.[index]?.quantity?.message}>
+                          <FormFieldWrapper label="Quantity" error={errors.items?.[index]?.quantity?.message} required>
                             <Input type="number" min={1} placeholder="1" {...register(`items.${index}.quantity`, { valueAsNumber: true })} />
                           </FormFieldWrapper>
                         </div>
 
                         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                          <FormFieldWrapper label="Unit Cost" error={errors.items?.[index]?.unit_price?.message}>
+                          <FormFieldWrapper label="Unit Cost" error={errors.items?.[index]?.unit_price?.message} required>
                             <Input placeholder="0.00" {...register(`items.${index}.unit_price`)} />
                           </FormFieldWrapper>
 
@@ -305,11 +305,11 @@ export function PurchaseForm({ open, onOpenChange, purchase }: PurchaseFormProps
                             <Input placeholder="Optional" {...register(`items.${index}.batch_number`)} />
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Manufacture Date" error={errors.items?.[index]?.manufacture_date?.message}>
+                          <FormFieldWrapper label="Manufacture Date" error={errors.items?.[index]?.manufacture_date?.message} required>
                             <Input type="date" {...register(`items.${index}.manufacture_date`)} />
                           </FormFieldWrapper>
 
-                          <FormFieldWrapper label="Expiry Date" error={errors.items?.[index]?.expiry_date?.message}>
+                          <FormFieldWrapper label="Expiry Date" error={errors.items?.[index]?.expiry_date?.message} required>
                             <Input type="date" {...register(`items.${index}.expiry_date`)} />
                           </FormFieldWrapper>
                         </div>

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { Building2, Loader2, MapPin, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -134,43 +134,47 @@ export function SupplierForm({ open, onOpenChange, supplier }: SupplierFormProps
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Company Details">
-            <FormFieldWrapper label="Supplier Name" htmlFor="name" error={errors.name?.message}>
-              <Input id="name" placeholder="Acme Distributors" {...register('name')} />
+          <FormSection title="Company Details" description="The vendor's registered business identity." icon={Building2}>
+            <FormFieldWrapper label="Supplier Name" htmlFor="name" error={errors.name?.message} required>
+              <Input id="name" placeholder="e.g. Shelys Pharmaceuticals Ltd" {...register('name')} />
             </FormFieldWrapper>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Contact Person" htmlFor="contact_person" error={errors.contact_person?.message}>
-                <Input id="contact_person" placeholder="Jane Doe" {...register('contact_person')} />
+              <FormFieldWrapper label="Tax ID (TIN)" htmlFor="tax_id" error={errors.tax_id?.message} helperText="Optional - for invoicing and compliance records.">
+                <Input id="tax_id" placeholder="e.g. 109-334-882" {...register('tax_id')} />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Phone" htmlFor="phone" error={errors.phone?.message}>
-                <Input id="phone" placeholder="+255712345678" {...register('phone')} />
-              </FormFieldWrapper>
+              <div className="flex items-center justify-between self-end rounded-lg border border-border/60 bg-background px-3 py-2.5">
+                <span className="text-sm font-medium">Active Supplier</span>
+                <Switch
+                  id="is_active"
+                  checked={watch('is_active')}
+                  onCheckedChange={(value) => setValue('is_active', value, { shouldValidate: true })}
+                />
+              </div>
             </div>
+          </FormSection>
 
+          <FormSection title="Contact Information" description="How your team reaches this supplier." icon={Phone}>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Email" htmlFor="email" error={errors.email?.message}>
-                <Input id="email" type="email" placeholder="sales@acme.com" {...register('email')} />
+              <FormFieldWrapper label="Contact Person" htmlFor="contact_person" error={errors.contact_person?.message} helperText="The person who handles your orders.">
+                <Input id="contact_person" placeholder="e.g. Grace Mmbaga" {...register('contact_person')} />
               </FormFieldWrapper>
 
-              <FormFieldWrapper label="Tax ID" htmlFor="tax_id" error={errors.tax_id?.message}>
-                <Input id="tax_id" placeholder="TIN-0001" {...register('tax_id')} />
+              <FormFieldWrapper label="Phone Number" htmlFor="phone" error={errors.phone?.message} required>
+                <Input id="phone" placeholder="e.g. +255 712 345 678" {...register('phone')} />
               </FormFieldWrapper>
             </div>
 
-            <FormFieldWrapper label="Address" htmlFor="address" error={errors.address?.message}>
-              <Textarea id="address" placeholder="Business address" {...register('address')} />
+            <FormFieldWrapper label="Email Address" htmlFor="email" error={errors.email?.message}>
+              <Input id="email" type="email" placeholder="e.g. orders@supplier.co.tz" {...register('email')} />
             </FormFieldWrapper>
+          </FormSection>
 
-            <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
-              <span className="text-sm font-medium">Active Supplier</span>
-              <Switch
-                id="is_active"
-                checked={watch('is_active')}
-                onCheckedChange={(value) => setValue('is_active', value, { shouldValidate: true })}
-              />
-            </div>
+          <FormSection title="Address" icon={MapPin}>
+            <FormFieldWrapper label="Business Address" htmlFor="address" error={errors.address?.message} helperText="Street, ward, and city - used for delivery and correspondence.">
+              <Textarea id="address" placeholder="e.g. Nyerere Road, Vingunguti, Dar es Salaam" {...register('address')} />
+            </FormFieldWrapper>
           </FormSection>
 
           <FormActions>

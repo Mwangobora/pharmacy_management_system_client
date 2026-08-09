@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { LayoutGrid, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -106,21 +106,21 @@ export function CategoryForm({ open, onOpenChange, category }: CategoryFormProps
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormLayout>
-          <FormSection title="Category Details">
-            <FormFieldWrapper label="Category Name" htmlFor="name" error={errors.name?.message}>
-              <Input id="name" placeholder="Analgesics" {...register('name')} />
+          <FormSection title="Category Details" description="Used to group medicines in the catalog and reports." icon={LayoutGrid}>
+            <FormFieldWrapper label="Category Name" htmlFor="name" error={errors.name?.message} required>
+              <Input id="name" placeholder="e.g. Analgesics & Antipyretics" {...register('name')} />
             </FormFieldWrapper>
 
-            <FormFieldWrapper label="Description" htmlFor="description" error={errors.description?.message}>
-              <Textarea id="description" placeholder="Short category note" {...register('description')} />
+            <FormFieldWrapper label="Description" htmlFor="description" error={errors.description?.message} helperText="Optional - shown to staff when choosing a category.">
+              <Textarea id="description" placeholder="e.g. Pain and fever relief medicines" {...register('description')} />
             </FormFieldWrapper>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <FormFieldWrapper label="Display Order" htmlFor="display_order" error={errors.display_order?.message}>
+              <FormFieldWrapper label="Display Order" htmlFor="display_order" error={errors.display_order?.message} helperText="Lower numbers appear first in lists.">
                 <Input id="display_order" type="number" min={0} placeholder="0" {...register('display_order')} />
               </FormFieldWrapper>
 
-              <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
+              <div className="flex items-center justify-between self-end rounded-lg border border-border/60 bg-background px-3 py-2.5">
                 <span className="text-sm font-medium">Active Category</span>
                 <Switch
                   id="is_active"
