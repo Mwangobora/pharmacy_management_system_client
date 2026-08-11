@@ -64,7 +64,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[15px] md:text-base">
       <DashboardHeader
         period={{ preset: filterState.preset, date_from: '', date_to: '', label: presetLabels[filterState.preset] }}
         isRefreshing={isFetching}
@@ -88,7 +88,11 @@ export default function DashboardPage() {
       <Tabs value={activeTab} onValueChange={(value) => startTransition(() => setActiveTab(value))} className="space-y-6">
         <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto rounded-3xl bg-muted/50 p-2">
           {availableTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="rounded-2xl px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="rounded-2xl px-4 py-2 text-sm md:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               {tab.label}
             </TabsTrigger>
           ))}

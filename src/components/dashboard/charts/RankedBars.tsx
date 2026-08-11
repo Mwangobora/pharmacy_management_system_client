@@ -24,13 +24,13 @@ export function RankedBars({
     <div className="space-y-3">
       {data.map((item) => (
         <div key={item.label} className="space-y-1.5">
-          <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex items-center justify-between gap-3 text-base">
             <p className="truncate font-medium">{item.label}</p>
-            <span className="text-muted-foreground">{valueFormatter(item.value)}</span>
+            <span className="font-medium text-muted-foreground">{valueFormatter(item.value)}</span>
           </div>
-          <div className="h-2.5 rounded-full bg-muted">
+          <div className="h-3 rounded-full bg-muted">
             <div
-              className="h-2.5 rounded-full bg-primary"
+              className="h-3 rounded-full bg-primary"
               style={{ width: `${(item.value / max) * 100}%` }}
             />
           </div>

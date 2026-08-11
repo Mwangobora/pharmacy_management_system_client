@@ -17,13 +17,13 @@ export function DashboardSection({
   return (
     <Card className="rounded-3xl border-border/70 shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div className="space-y-1">
-          <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
+        <div className="space-y-1.5">
+          <CardTitle className="text-xl">{title}</CardTitle>
+          {description ? <CardDescription className="text-base">{description}</CardDescription> : null}
         </div>
         {action}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="text-base">{children}</CardContent>
     </Card>
   )
 }

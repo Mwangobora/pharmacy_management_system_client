@@ -43,13 +43,13 @@ export function DashboardKpiCard({
 
   return (
     <Card className="rounded-3xl border-border/70 shadow-sm">
-      <CardContent className={compact ? 'space-y-2 p-4' : 'space-y-3 p-5'}>
+      <CardContent className={compact ? 'space-y-3 p-4' : 'space-y-4 p-5'}>
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="space-y-1.5">
+            <p className="text-base font-semibold uppercase tracking-[0.1em] text-muted-foreground">
               {metric.label}
             </p>
-            <p className={compact ? 'text-2xl font-semibold' : 'text-3xl font-semibold'}>
+            <p className={compact ? 'text-3xl font-bold' : 'text-4xl font-bold'}>
               {value}
             </p>
           </div>
@@ -61,12 +61,12 @@ export function DashboardKpiCard({
         </div>
 
         {metric.comparison_available && change ? (
-          <div className={`flex items-center gap-2 text-xs ${positive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-            {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+          <div className={`flex items-center gap-2 text-base font-medium ${positive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            {positive ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
             <span>{change} compared with previous period</span>
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             {metric.restricted ? 'Requires elevated permission' : 'Comparison unavailable'}
           </p>
         )}

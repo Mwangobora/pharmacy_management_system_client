@@ -67,10 +67,10 @@ export function OverviewDashboard({
                 <a key={alert.key} href={alert.href} className="block rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 transition hover:bg-muted/40">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-medium">{alert.label}</p>
-                      <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{alert.severity}</p>
+                      <p className="text-base font-medium">{alert.label}</p>
+                      <p className="text-sm uppercase tracking-[0.14em] text-muted-foreground">{alert.severity}</p>
                     </div>
-                    <span className="text-lg font-semibold">{alert.count}</span>
+                    <span className="text-2xl font-bold">{alert.count}</span>
                   </div>
                 </a>
               ))}
@@ -81,7 +81,7 @@ export function OverviewDashboard({
 
       <div className="grid gap-6 xl:grid-cols-3">
         <DashboardSection title="Sales and profit summary">
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-base">
             <div className="flex items-center justify-between"><span>Revenue</span><span className="font-medium">{formatTzsCurrency(data.profit_summary.revenue)}</span></div>
             <div className="flex items-center justify-between"><span>Estimated gross profit</span><span className="font-medium">{data.profit_summary.estimated_gross_profit === null ? 'Restricted' : formatTzsCurrency(data.profit_summary.estimated_gross_profit)}</span></div>
             <div className="flex items-center justify-between"><span>Estimated refund value</span><span className="font-medium">{formatTzsCurrency(data.profit_summary.refund_estimate)}</span></div>

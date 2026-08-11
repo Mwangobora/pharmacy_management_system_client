@@ -16,18 +16,18 @@ export function DashboardHeader({
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+        <p className="text-base font-semibold uppercase tracking-[0.16em] text-primary">
           Owner Dashboard
         </p>
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
             Pharmacy performance at a glance
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             {period?.label || 'Select a period to load operational and executive insight.'}
           </p>
           {period?.updated_at ? (
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-base text-muted-foreground">
               Last updated: {new Intl.DateTimeFormat('en-TZ', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -39,8 +39,8 @@ export function DashboardHeader({
         </div>
       </div>
 
-      <Button onClick={onRefresh} className="rounded-2xl">
-        <RefreshCcw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+      <Button onClick={onRefresh} size="lg" className="rounded-2xl text-base">
+        <RefreshCcw className={`mr-2 h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
         Refresh dashboard
       </Button>
     </div>

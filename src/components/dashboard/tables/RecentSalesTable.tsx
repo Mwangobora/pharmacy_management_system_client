@@ -28,40 +28,40 @@ export function RecentSalesTable({ rows }: RecentSalesTableProps) {
 
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="text-base">
         <TableHeader>
           <TableRow>
-            <TableHead>Sale</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Cashier</TableHead>
-            <TableHead>Items</TableHead>
-            <TableHead>Payment</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Total</TableHead>
+            <TableHead className="text-base">Sale</TableHead>
+            <TableHead className="text-base">Time</TableHead>
+            <TableHead className="text-base">Customer</TableHead>
+            <TableHead className="text-base">Cashier</TableHead>
+            <TableHead className="text-base">Items</TableHead>
+            <TableHead className="text-base">Payment</TableHead>
+            <TableHead className="text-base">Status</TableHead>
+            <TableHead className="text-right text-base">Total</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
             <TableRow key={row.id}>
-              <TableCell className="font-medium">
+              <TableCell className="text-[15px] font-medium md:text-base">
                 <Link to={getSaleDetailPath(row.id)} className="text-primary hover:underline">
                   {row.invoice_number}
                 </Link>
               </TableCell>
-              <TableCell>{new Intl.DateTimeFormat('en-TZ', { hour: '2-digit', minute: '2-digit' }).format(new Date(row.sale_date))}</TableCell>
-              <TableCell>{row.customer_name}</TableCell>
-              <TableCell>{row.cashier}</TableCell>
-              <TableCell>{row.items_count}</TableCell>
-              <TableCell className="capitalize">{row.payment_method}</TableCell>
-              <TableCell className="capitalize">{row.status}</TableCell>
-              <TableCell className="text-right">{formatTzsCurrency(row.total)}</TableCell>
+              <TableCell className="text-[15px] md:text-base">{new Intl.DateTimeFormat('en-TZ', { hour: '2-digit', minute: '2-digit' }).format(new Date(row.sale_date))}</TableCell>
+              <TableCell className="text-[15px] md:text-base">{row.customer_name}</TableCell>
+              <TableCell className="text-[15px] md:text-base">{row.cashier}</TableCell>
+              <TableCell className="text-[15px] md:text-base">{row.items_count}</TableCell>
+              <TableCell className="text-[15px] capitalize md:text-base">{row.payment_method}</TableCell>
+              <TableCell className="text-[15px] capitalize md:text-base">{row.status}</TableCell>
+              <TableCell className="text-right text-[15px] font-medium md:text-base">{formatTzsCurrency(row.total)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
       <div className="pt-3 text-right">
-        <Link to={ROUTES.SALES} className="text-sm font-medium text-primary hover:underline">
+        <Link to={ROUTES.SALES} className="text-base font-medium text-primary hover:underline">
           View all sales
         </Link>
       </div>

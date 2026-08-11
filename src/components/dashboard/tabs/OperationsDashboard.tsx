@@ -33,7 +33,7 @@ export function OperationsDashboard({ filters, active }: OperationsDashboardProp
                       <p className="font-medium">{item.reference}</p>
                       <p className="text-sm text-muted-foreground">{item.type} · {item.assigned_user}</p>
                     </div>
-                    <div className="text-right text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    <div className="text-right text-sm uppercase tracking-[0.14em] text-muted-foreground">
                       <p>{item.priority}</p>
                       <p>{item.status}</p>
                     </div>
@@ -51,9 +51,9 @@ export function OperationsDashboard({ filters, active }: OperationsDashboardProp
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="font-medium">{item.label}</p>
-                    <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{item.status.replaceAll('_', ' ')}</p>
+                    <p className="text-sm uppercase tracking-[0.14em] text-muted-foreground">{item.status.replaceAll('_', ' ')}</p>
                   </div>
-                  <span className="text-xl font-semibold">{item.count}</span>
+                  <span className="text-2xl font-bold">{item.count}</span>
                 </div>
               </div>
             ))}

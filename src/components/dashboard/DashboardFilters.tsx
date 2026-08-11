@@ -72,15 +72,15 @@ export function DashboardFilters(props: DashboardFiltersProps) {
 
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="rounded-2xl">
+          <Button variant="outline" className="rounded-2xl text-base">
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             Advanced filters
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-[320px] rounded-3xl">
+        <PopoverContent align="end" className="w-[320px] rounded-3xl text-base">
           <div className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Cashier</p>
+              <p className="text-base font-medium">Cashier</p>
               <Select value={cashierId || 'all'} onValueChange={(value) => onCashierChange(value === 'all' ? '' : value)}>
                 <SelectTrigger className="rounded-2xl">
                   <SelectValue placeholder="All cashiers" />
@@ -97,7 +97,7 @@ export function DashboardFilters(props: DashboardFiltersProps) {
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Payment method</p>
+              <p className="text-base font-medium">Payment method</p>
               <Select value={paymentMethod || 'all'} onValueChange={(value) => onPaymentMethodChange(value === 'all' ? '' : value)}>
                 <SelectTrigger className="rounded-2xl">
                   <SelectValue placeholder="All payment methods" />
