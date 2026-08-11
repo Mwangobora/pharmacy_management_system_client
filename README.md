@@ -11,6 +11,25 @@ npm run dev
 
 The app runs at `http://localhost:5173` and expects the backend API at the URL configured in `.env` (`VITE_API_BASE_URL`, default `http://0.0.0.0:8000`). Start the backend first — see `pharmacy_management_system/ReadMe.md`.
 
+## Deploying To Vercel
+
+This Vite app can be deployed directly to Vercel.
+
+Use these settings:
+
+- Framework Preset: `Vite`
+- Root Directory: `pharmacy_management_system_client`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+
+Set this environment variable in Vercel before deploying:
+
+```bash
+VITE_API_BASE_URL=https://7502e1369a6a82.lhr.life
+```
+
+The included [vercel.json](/home/francis/Desktop/francis/PMS/pharmacy_management_system_client/vercel.json:1) rewrites all routes to `index.html`, which is required for this React Router single-page app so routes like `/login` and `/dashboard/sales-billing/sales` work after refresh or direct navigation.
+
 ## Demo Login
 
 The backend ships a seed command (`python manage.py seed_demo_data`) that loads realistic Tanzanian pharmacy data — 17 categories, 6 suppliers, 100 medicines with opening stock, and 4 demo accounts, one per role. Run it once against the backend, then log in at `/login` with any of:

@@ -18,7 +18,8 @@ class HttpClient {
   private hasShownSessionExpired = false
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://0.0.0.0:8000'
+    this.baseUrl =
+      import.meta.env.VITE_API_BASE_URL || 'https://7502e1369a6a82.lhr.life'
   }
 
   private getAuthHeaders(): HeadersInit {
