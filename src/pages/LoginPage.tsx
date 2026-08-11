@@ -16,6 +16,11 @@ import { AuthApi } from '@/api/AuthApi'
 import { notify } from '@/lib/notify'
 import { ROUTES } from '@/routes/paths'
 
+const DEMO_ACCOUNT = {
+  email: 'pharmacyAdmin@gmail.com',
+  password: 'pharmacy@123',
+}
+
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -34,12 +39,19 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: 'onBlur',
     reValidateMode: 'onChange',
+    defaultValues: DEMO_ACCOUNT,
   })
+
+  const applyDemoCredentials = () => {
+    setValue('email', DEMO_ACCOUNT.email, { shouldDirty: true, shouldTouch: true })
+    setValue('password', DEMO_ACCOUNT.password, { shouldDirty: true, shouldTouch: true })
+  }
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
@@ -86,8 +98,41 @@ export default function LoginPage() {
             </div>
             <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to your account to continue
+              Sign in to the live pharmacy demo workspace
             </p>
+          </div>
+
+          <div className="rounded-3xl border border-primary/20 bg-primary/5 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">Demo pharmacy account</p>
+                <p className="text-sm text-muted-foreground">
+                  Use this account during pharmacy testing to access the full system.
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={applyDemoCredentials}>
+                Use demo account
+              </Button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-border/70 bg-background/90 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  Email
+                </p>
+                <p className="mt-1 break-all font-mono text-sm text-foreground">
+                  {DEMO_ACCOUNT.email}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border/70 bg-background/90 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  Password
+                </p>
+                <p className="mt-1 font-mono text-sm text-foreground">
+                  {DEMO_ACCOUNT.password}
+                </p>
+              </div>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
