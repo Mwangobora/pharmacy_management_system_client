@@ -19,7 +19,7 @@ class HttpClient {
 
   constructor() {
     this.baseUrl =
-      import.meta.env.VITE_API_BASE_URL || 'https://d1e1b88f09109e.lhr.life'
+      import.meta.env.VITE_API_BASE_URL || 'https://pgqwn-197-186-5-66.free.pinggy.net'
   }
 
   private getAuthHeaders(): HeadersInit {
