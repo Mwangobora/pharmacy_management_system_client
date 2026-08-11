@@ -19,7 +19,7 @@ class HttpClient {
 
   constructor() {
     this.baseUrl =
-      import.meta.env.VITE_API_BASE_URL || 'https://7502e1369a6a82.lhr.life'
+      import.meta.env.VITE_API_BASE_URL || 'https://d1e1b88f09109e.lhr.life'
   }
 
   private getAuthHeaders(): HeadersInit {
